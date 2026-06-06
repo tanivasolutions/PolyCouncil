@@ -21,7 +21,7 @@ alter table public.chats
   add column if not exists business_id text;
 
 update public.chats
-set scope_id = coalesce(module_id, 'iron-city-cargo')
+set scope_id = coalesce(module_id, 'council')
 where scope_id is null;
 
 alter table public.chats

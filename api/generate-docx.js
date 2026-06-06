@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     );
     res.setHeader(
       "Content-Disposition",
-      'attachment; filename="iron-city-cargo.docx"'
+      'attachment; filename="polycouncil-export.docx"'
     );
     return res.send(buffer);
   } catch (err) {

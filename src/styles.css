@@ -24,7 +24,6 @@
   --dropdown-panel-bg: #2d1b69;
   --dropdown-option-hover: #4e3494;
   --dropdown-selected: #c084fc;
-  --paris-accent: #a78bfa;
   --dropdown-divider: rgba(196, 168, 255, 0.3);
 
   /* Surfaces */
@@ -43,19 +42,7 @@
   --text-secondary: #6b48a0;
   --text-muted: #a78bfa;
 
-  /* Agent accents (legacy aliases) */
-  --navy: #2d1b69;
-  --gold: #c084fc;
-  --steel: #93c5fd;
-  --forest: #f0abcc;
-  --reid: #c084fc;
-  --reid-text: #3b0764;
-  --leo: #93c5fd;
-  --leo-text: #1e3a5f;
-  --mason: #f0abcc;
-  --mason-text: #6b1a3a;
-  --paris: #a78bfa;
-  --paris-text: #2d1b69;
+  /* Agent accents */
   --agent-role-color: #a78bfa;
 
   /* Buttons */
@@ -78,15 +65,6 @@
   --input-focus: #c084fc;
 
   /* Tag hints */
-  --tag-reid-bg: #ede9fe;
-  --tag-reid-text: #4c1d95;
-  --tag-reid-hover: #ddd6fe;
-  --tag-leo-bg: #eff6ff;
-  --tag-leo-text: #1e3a5f;
-  --tag-leo-hover: #dbeafe;
-  --tag-mason-bg: #fff0f8;
-  --tag-mason-text: #6b1a3a;
-  --tag-mason-hover: #fce7f3;
   --tag-all-bg: #f5f0ff;
   --tag-all-text: #2d1b69;
   --tag-all-hover: #ede9fe;
@@ -99,12 +77,12 @@
   --tag-advocate-text: #92400e;
   --tag-advocate-hover: #fef3c7;
 
-  --agent-architect: #93c5fd;
-  --agent-architect-text: #1e3a5f;
-  --agent-architect-name: #3b82f6;
-  --tag-architect-bg: #eff6ff;
-  --tag-architect-text: #1e40af;
-  --tag-architect-hover: #dbeafe;
+  --agent-strategist: #93c5fd;
+  --agent-strategist-text: #1e3a5f;
+  --agent-strategist-name: #3b82f6;
+  --tag-strategist-bg: #eff6ff;
+  --tag-strategist-text: #1e40af;
+  --tag-strategist-hover: #dbeafe;
 
   --agent-skeptic: #fda4af;
   --agent-skeptic-text: #881337;
@@ -133,28 +111,6 @@
   --tag-temporal-bg: #ecfeff;
   --tag-temporal-text: #0e7490;
   --tag-temporal-hover: #cffafe;
-
-  /* Stocks agent themes */
-  --agent-nova: #7dd3fc;
-  --agent-nova-text: #0c4a6e;
-  --agent-nova-name: #0284c7;
-  --tag-nova-bg: #f0f9ff;
-  --tag-nova-text: #075985;
-  --tag-nova-hover: #e0f2fe;
-
-  --agent-felix: #86efac;
-  --agent-felix-text: #14532d;
-  --agent-felix-name: #16a34a;
-  --tag-felix-bg: #f0fdf4;
-  --tag-felix-text: #166534;
-  --tag-felix-hover: #dcfce7;
-
-  --agent-sage: #fcd34d;
-  --agent-sage-text: #713f12;
-  --agent-sage-name: #ca8a04;
-  --tag-sage-bg: #fffbeb;
-  --tag-sage-text: #a16207;
-  --tag-sage-hover: #fef3c7;
 
   /* Scrollbar */
   --scrollbar-track: #f5f0ff;
@@ -570,21 +526,6 @@ body.sidebar-collapsed .sidebar-toggle-btn {
   user-select: none;
 }
 
-.av-reid {
-  background: var(--reid);
-  color: var(--reid-text);
-}
-
-.av-leo {
-  background: var(--leo);
-  color: var(--leo-text);
-}
-
-.av-mason {
-  background: var(--mason);
-  color: var(--mason-text);
-}
-
 .av-you {
   background: var(--sidebar-active);
   color: var(--sidebar-text);
@@ -956,24 +897,6 @@ body.sidebar-collapsed .sidebar-toggle-btn {
   border: 0.5px solid;
 }
 
-.chip-reid {
-  background: var(--tag-reid-bg);
-  color: var(--reid);
-  border-color: var(--border);
-}
-
-.chip-leo {
-  background: var(--tag-leo-bg);
-  color: var(--leo);
-  border-color: var(--border);
-}
-
-.chip-mason {
-  background: var(--tag-mason-bg);
-  color: var(--mason);
-  border-color: var(--border);
-}
-
 .chip-dot {
   width: 5px;
   height: 5px;
@@ -1076,17 +999,6 @@ body.sidebar-collapsed .sidebar-toggle-btn {
   flex-shrink: 0;
 }
 
-.agent-desc-name.reid {
-  color: var(--gold);
-}
-
-.agent-desc-name.leo {
-  color: var(--steel);
-}
-
-.agent-desc-name.mason {
-  color: var(--forest);
-}
 
 .agent-desc-role {
   position: relative;
@@ -1368,18 +1280,6 @@ body.sidebar-collapsed .sidebar-toggle-btn {
   margin-top: 1px;
 }
 
-.msg-sender.reid {
-  color: var(--gold);
-}
-
-.msg-sender.leo {
-  color: var(--steel);
-}
-
-.msg-sender.mason {
-  color: var(--forest);
-}
-
 .msg-sender.you {
   color: var(--text-primary);
 }
@@ -1526,18 +1426,12 @@ body.sidebar-collapsed .sidebar-toggle-btn {
   background: var(--bg-tertiary);
 }
 
-.bubble-reid,
-.bubble-leo,
-.bubble-mason,
 .bubble-advocate,
-.bubble-architect,
+.bubble-strategist,
 .bubble-skeptic,
 .bubble-pragmatist,
 .bubble-innovator,
-.bubble-temporal,
-.bubble-nova,
-.bubble-felix,
-.bubble-sage {
+.bubble-temporal {
   background: var(--agent-bubble-bg);
   border: 1px solid var(--agent-bubble-border);
   color: var(--agent-bubble-text);
@@ -1562,21 +1456,6 @@ body.sidebar-collapsed .sidebar-toggle-btn {
   margin-bottom: 6px;
 }
 
-.tag-reid {
-  background: var(--tag-reid-bg);
-  color: var(--reid);
-}
-
-.tag-leo {
-  background: var(--tag-leo-bg);
-  color: var(--leo);
-}
-
-.tag-mason {
-  background: var(--tag-mason-bg);
-  color: var(--mason);
-}
-
 .highlight {
   display: inline-block;
   font-weight: 600;
@@ -1596,7 +1475,7 @@ body.sidebar-collapsed .sidebar-toggle-btn {
 }
 
 .hl-navy {
-  background: var(--tag-reid-bg);
+  background: var(--bg-secondary);
   color: var(--text-primary);
 }
 
@@ -2010,36 +1889,6 @@ body.sidebar-collapsed .sidebar-toggle-btn {
   border: 0.5px solid;
   transition: background 0.15s;
   font-family: inherit;
-}
-
-.th-reid {
-  background: var(--tag-reid-bg);
-  color: var(--tag-reid-text);
-  border-color: var(--border);
-}
-
-.th-reid:hover {
-  background: var(--tag-reid-hover);
-}
-
-.th-leo {
-  background: var(--tag-leo-bg);
-  color: var(--tag-leo-text);
-  border-color: var(--border);
-}
-
-.th-leo:hover {
-  background: var(--tag-leo-hover);
-}
-
-.th-mason {
-  background: var(--tag-mason-bg);
-  color: var(--tag-mason-text);
-  border-color: var(--border);
-}
-
-.th-mason:hover {
-  background: var(--tag-mason-hover);
 }
 
 .th-all {
@@ -2535,13 +2384,6 @@ body.sidebar-collapsed .sidebar-toggle-btn {
     min-width: fit-content;
   }
 
-  .agent-desc-role[data-agent="mason"] .agent-desc-role-full {
-    display: none;
-  }
-
-  .agent-desc-role[data-agent="mason"] .agent-desc-role-short {
-    display: inline;
-  }
 
   .agent-desc-name-btn .agent-desc-tooltip {
     min-width: 200px;
@@ -2955,8 +2797,8 @@ body.sidebar-collapsed .sidebar-toggle-btn {
 }
 
 .doc-tag-option.is-suggested:not(.is-selected) {
-  border-color: var(--reid);
-  background: var(--tag-reid-bg);
+  border-color: var(--input-focus);
+  background: var(--bg-secondary);
 }
 
 .doc-tag-suggested-label {
@@ -2964,7 +2806,7 @@ body.sidebar-collapsed .sidebar-toggle-btn {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--reid);
+  color: var(--agent-strategist-name);
   line-height: 1;
 }
 

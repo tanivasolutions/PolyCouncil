@@ -11,41 +11,14 @@ import {
   sheetsToFullMarkdown,
 } from "./spreadsheet.js";
 
-const BUSINESS_AGENT_TAG_KEYWORDS = {
-  reid: [
-    "financial",
-    "revenue",
-    "expenses",
-    "carriers",
-    "rates",
-    "pricing",
-    "budget",
-    "cash",
-  ],
-  leo: [
-    "operations",
-    "compliance",
-    "drivers",
-    "fleet",
-    "maintenance",
-    "process",
-    "carriers",
-    "schedule",
-  ],
-  mason: [
-    "market",
-    "strategy",
-    "growth",
-    "competitors",
-    "partnerships",
-    "opportunities",
-    "carriers",
-    "pipeline",
-  ],
+const DEFAULT_AGENT_TAG_KEYWORDS = {
+  strategist: ["strategy", "planning", "systems", "all"],
+  skeptic: ["risk", "research", "audit", "all"],
+  pragmatist: ["planning", "process", "operations", "all"],
 };
 
 const SPREADSHEET_FOLLOWUP_PATTERN =
-  /\b(sheet|spreadsheet|rows?|columns?|cells?|tabs?|full data|all rows|the data|rate sheet|carrier rates?|load rates?|break\s?down|analyze|specific sheet|show me|pull up|drill down|what about|how many|which carrier)\b/i;
+  /\b(sheet|spreadsheet|rows?|columns?|cells?|tabs?|full data|all rows|the data|break\s?down|analyze|specific sheet|show me|pull up|drill down|what about|how many)\b/i;
 
 function normalizeAgentName(agentName) {
   return String(agentName ?? "").trim().toLowerCase();
@@ -59,8 +32,7 @@ function normalizeTags(tags) {
 
 function getAgentTagKeywords() {
   const mod = getActiveModule();
-  if (mod?.agentTagKeywords) return mod.agentTagKeywords;
-  return BUSINESS_AGENT_TAG_KEYWORDS;
+  return mod?.agentTagKeywords ?? DEFAULT_AGENT_TAG_KEYWORDS;
 }
 
 export function isDocumentRelevantToAgent(metadata, agentName) {
@@ -76,19 +48,11 @@ export function isDocumentRelevantToAgent(metadata, agentName) {
 
 export function getVisibleAgentsForDocument(metadata) {
   const mod = getActiveModule();
-  const agentMap = mod?.agentGroup ?? null;
+  const agentMap = mod?.agentGroup ?? {};
 
-  if (agentMap) {
-    return Object.entries(agentMap)
-      .filter(([key]) => isDocumentRelevantToAgent(metadata, key))
-      .map(([, agent]) => agent.name);
-  }
-
-  const agents = [];
-  if (isDocumentRelevantToAgent(metadata, "reid")) agents.push("Reid");
-  if (isDocumentRelevantToAgent(metadata, "leo")) agents.push("Leo");
-  if (isDocumentRelevantToAgent(metadata, "mason")) agents.push("Mason");
-  return agents;
+  return Object.entries(agentMap)
+    .filter(([key]) => isDocumentRelevantToAgent(metadata, key))
+    .map(([, agent]) => agent.name);
 }
 
 function parseDataUrl(dataUrl) {

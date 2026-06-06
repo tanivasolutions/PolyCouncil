@@ -1,4 +1,4 @@
--- Iron City Cargo — one-time Supabase setup
+-- PolyCouncil — one-time Supabase setup
 -- Run this entire file in: Supabase Dashboard → SQL Editor → New query → Run
 
 -- ---------------------------------------------------------------------------
@@ -27,7 +27,7 @@ create table public.messages (
   role text not null check (role in ('user', 'assistant')),
   agent text check (
     agent is null
-    or agent in ('reid', 'leo', 'mason')
+    or length(agent) > 0
   ),
   content text not null,
   attachments jsonb,
@@ -41,7 +41,7 @@ create table public.messages (
 create table public.memory (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
-  agent text not null default 'shared' check (agent in ('shared')),
+  agent text not null default 'shared' check (length(agent) > 0),
   fact text not null,
   category text default null,
   created_at timestamptz not null default now()

@@ -36,7 +36,7 @@ function listDocsMetaKeys() {
   if (typeof localStorage === "undefined") return keys;
   for (let i = 0; i < localStorage.length; i += 1) {
     const key = localStorage.key(i);
-    if (key?.startsWith("docs_meta_")) keys.push(key);
+    if (key?.startsWith("pc-docs_meta_") || key?.startsWith("docs_meta_")) keys.push(key);
   }
   return keys.sort();
 }
@@ -46,16 +46,18 @@ function listMemoryFactsKeys() {
   if (typeof localStorage === "undefined") return keys;
   for (let i = 0; i < localStorage.length; i += 1) {
     const key = localStorage.key(i);
-    if (key?.startsWith("memoryFacts_")) keys.push(key);
+    if (key?.startsWith("pc-memoryFacts_") || key?.startsWith("memoryFacts_")) keys.push(key);
   }
   return keys.sort();
 }
 
 function scopeIdFromDocsMetaKey(key) {
+  if (key.startsWith("pc-docs_meta_")) return key.slice("pc-docs_meta_".length);
   return key.slice("docs_meta_".length);
 }
 
 function scopeIdFromMemoryKey(key) {
+  if (key.startsWith("pc-memoryFacts_")) return key.slice("pc-memoryFacts_".length);
   return key.slice("memoryFacts_".length);
 }
 

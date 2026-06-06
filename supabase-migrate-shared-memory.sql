@@ -11,7 +11,7 @@ alter table public.memory
 
 alter table public.memory
   add constraint memory_agent_check
-  check (agent in ('reid', 'leo', 'mason', 'shared'));
+  check (length(agent) > 0);
 
 alter table public.memory
   add column if not exists category text default null;

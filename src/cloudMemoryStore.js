@@ -13,7 +13,7 @@ export function isCloudMemoryEnabled() {
 }
 
 function cloudSyncFlagKey(userId) {
-  return `migration_memory_cloud_${userId}_done`;
+  return `pc-migration-memory-cloud-${userId}-done`;
 }
 
 function rowToLocal(row) {
@@ -153,9 +153,9 @@ export async function syncLocalMemoryToCloud() {
 
   for (let i = 0; i < localStorage.length; i += 1) {
     const key = localStorage.key(i);
-    if (!key?.startsWith("memoryFacts_")) continue;
+    if (!key?.startsWith("pc-memoryFacts_")) continue;
 
-    const scopeId = key.slice("memoryFacts_".length);
+    const scopeId = key.slice("pc-memoryFacts_".length);
     let rows = [];
 
     try {
@@ -202,8 +202,8 @@ export function listLocalMemoryScopeIds() {
   const scopes = new Set();
   for (let i = 0; i < localStorage.length; i += 1) {
     const key = localStorage.key(i);
-    if (key?.startsWith("memoryFacts_")) {
-      scopes.add(key.slice("memoryFacts_".length));
+    if (key?.startsWith("pc-memoryFacts_")) {
+      scopes.add(key.slice("pc-memoryFacts_".length));
     }
   }
   return [...scopes];

@@ -5,11 +5,9 @@ const TABLE = "user_preferences";
 let cloudUserId = null;
 
 export const DEFAULT_USER_PREFERENCES = {
-  active_module_id: "iron-city-cargo",
-  active_business_id: "iron-city-cargo",
+  active_module_id: "council",
   sidebar_collapsed: false,
   current_chat_by_scope: {},
-  last_market_brief_check: null,
 };
 
 export function setCloudPreferencesUser(userId) {
@@ -25,16 +23,12 @@ function normalizePreferences(raw) {
   if (!raw || typeof raw !== "object") return base;
 
   return {
-    active_module_id:
-      raw.active_module_id ?? base.active_module_id,
-    active_business_id:
-      raw.active_business_id ?? base.active_business_id,
+    active_module_id: raw.active_module_id ?? base.active_module_id,
     sidebar_collapsed: Boolean(raw.sidebar_collapsed),
     current_chat_by_scope:
       raw.current_chat_by_scope && typeof raw.current_chat_by_scope === "object"
         ? { ...raw.current_chat_by_scope }
         : {},
-    last_market_brief_check: raw.last_market_brief_check ?? null,
   };
 }
 

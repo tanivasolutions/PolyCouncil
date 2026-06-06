@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
-    <title>Taylor's Command Center</title>
+    <title>PolyCouncil</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"
@@ -25,8 +25,8 @@
       <aside class="sidebar" id="sidebar">
         <div class="sb-top">
           <div class="sb-top-main">
-            <div class="sb-app-name">Taylor's Command Center</div>
-            <div class="sb-brand-wrap">
+            <div class="sb-app-name">PolyCouncil</div>
+            <div class="sb-brand-wrap hidden" aria-hidden="true">
               <span class="sb-brand" id="business-select-label">Business</span>
             <div class="business-dropdown" id="business-dropdown">
               <button
@@ -168,41 +168,7 @@
         </header>
 
         <div class="page active" id="page-chat">
-          <div class="agent-desc-bar">
-            <div class="agent-desc-item">
-              <div class="av av-reid">R</div>
-              <div class="agent-desc-content">
-                <span class="agent-desc-name reid">Reid</span>
-                <button type="button" class="agent-desc-role" data-agent="reid" aria-expanded="false" aria-label="CFO — Cash flow, margins, profitability, growth modeling">
-                  CFO
-                  <span class="agent-desc-tooltip" role="tooltip">Cash flow, margins, profitability, growth modeling</span>
-                </button>
-              </div>
-            </div>
-            <div class="agent-desc-divider" aria-hidden="true"></div>
-            <div class="agent-desc-item">
-              <div class="av av-leo">L</div>
-              <div class="agent-desc-content">
-                <span class="agent-desc-name leo">Leo</span>
-                <button type="button" class="agent-desc-role" data-agent="leo" aria-expanded="false" aria-label="COO — Drivers, fleet, compliance, dispatch">
-                  COO
-                  <span class="agent-desc-tooltip" role="tooltip">Drivers, fleet, compliance, dispatch</span>
-                </button>
-              </div>
-            </div>
-            <div class="agent-desc-divider" aria-hidden="true"></div>
-            <div class="agent-desc-item">
-              <div class="av av-mason">M</div>
-              <div class="agent-desc-content">
-                <span class="agent-desc-name mason">Mason</span>
-                <button type="button" class="agent-desc-role" data-agent="mason" aria-expanded="false" aria-label="Business Development — New segments, contracts, market opportunities">
-                  <span class="agent-desc-role-full">Business Development</span>
-                  <span class="agent-desc-role-short">BizDev</span>
-                  <span class="agent-desc-tooltip" role="tooltip">New segments, contracts, market opportunities</span>
-                </button>
-              </div>
-            </div>
-          </div>
+          <div class="agent-desc-bar"></div>
           <div class="chat-page-body" id="chat-page-body">
             <div class="drop-zone-overlay hidden" id="drop-zone-overlay">
               <div class="drop-zone-label">
@@ -213,26 +179,13 @@
             <div class="messages" id="messages"></div>
 
             <div class="input-area">
-              <div class="tag-hints">
-                <button type="button" class="tag-hint th-reid" data-tag="@Reid ">
-                  @Reid
-                </button>
-                <button type="button" class="tag-hint th-leo" data-tag="@Leo ">
-                  @Leo
-                </button>
-                <button type="button" class="tag-hint th-mason" data-tag="@Mason ">
-                  @Mason
-                </button>
-                <button type="button" class="tag-hint th-all" data-tag="@all ">
-                  @all
-                </button>
-              </div>
+              <div class="tag-hints"></div>
               <div class="attachment-chips hidden" id="attachment-chips"></div>
               <div class="input-box">
                 <textarea
                   id="msg-input"
                   rows="1"
-                  placeholder="Message Reid, Leo, and Mason… or tag with @Reid @Leo @Mason @all"
+                  placeholder="Message your council… or tag an agent with @Strategist @Skeptic @Pragmatist @all"
                 ></textarea>
                 <div class="input-actions">
                   <input
@@ -271,8 +224,7 @@
                 </div>
               </div>
               <div class="input-hint">
-                Tag an agent to direct your message · @all broadcasts to all three
-                · No tag = auto-routed · Shift+Enter for new line
+                Tag an agent to direct your message · @all broadcasts to all council members · No tag = auto-routed · Shift+Enter for new line
               </div>
             </div>
           </div>
@@ -280,7 +232,7 @@
 
         <div class="page" id="page-memory">
           <div class="mem-page-header">
-            <div class="mem-page-title">Iron City Cargo Knowledge Base</div>
+            <div class="mem-page-title">Council Knowledge Base</div>
             <div class="mem-page-sub">
               Shared knowledge base — all agents read from the same facts
             </div>
@@ -316,7 +268,7 @@
           <div class="doc-page-header">
             <div class="doc-page-title" id="doc-page-title">Documents</div>
             <div class="doc-page-sub" id="doc-page-sub">
-              Files uploaded here are available to Reid, Leo, and Mason as context in every conversation.
+              Files uploaded here are available to your council agents as context in every conversation.
             </div>
           </div>
           <div class="doc-page-body" id="documents-body"></div>
@@ -336,7 +288,13 @@
     </div>
 
     <script type="module">
-      import { REID, LEO, MASON } from "/src/agents.js";
+      import {
+        SIDEBAR_COLLAPSED_KEY,
+        CURRENT_CHAT_KEY_PREFIX,
+        chatHistoryStorageKey,
+        memoryFactsStorageKey,
+        currentChatStorageKey as chatSessionKeyForScope,
+      } from "/src/storage-keys.js";
       import {
         buildAgentUIMeta,
         defaultAgentTooltipHint,
@@ -351,11 +309,8 @@
         repositionVisibleAgentTooltips,
       } from "/src/agent-tooltip-position.js";
       import {
-        ALL_MODULES,
         getActiveModule,
         getActiveModuleId,
-        setActiveModule,
-        isBusinessModule,
       } from "/src/modules/index.js";
       import { createScopeUiState, scopeLoadingHtml } from "/src/scope-ui-state.js";
       import {
@@ -392,7 +347,6 @@
       } from "/src/agent-flags.js";
       import {
         MAX_ATTACHMENTS,
-        applyUspsFastTrack,
         buildAttachmentMetadata,
         buildUserApiContent,
         formatFileSize,
@@ -400,16 +354,7 @@
         getFileCategory,
         isAcceptedFile,
       } from "/src/attachments.js";
-      import {
-        buildLiveMarketContext,
-        isMarketBriefRequest,
-      } from "/src/market-context.js";
-      import { startBriefPoller } from "/src/brief-poller.js";
       import { getSession, signOut } from "/src/auth.js";
-      import {
-        BUSINESSES,
-        getActiveBusiness,
-      } from "/src/businesses/index.js";
       import { getVisibleAgentsForDocument } from "/documents/contextBuilder.js";
       import {
         deleteDocument,
@@ -453,9 +398,6 @@
         },
       });
 
-      const SIDEBAR_COLLAPSED_KEY = "icc-sidebar-collapsed";
-      const CURRENT_CHAT_KEY_PREFIX = "icc-current-chat-id";
-
       function buildAgentMetaEntry(key, agent, roleOverride) {
         const { icon, iconFallback, initial } = resolveAgentAvatarFields(agent);
         return {
@@ -471,19 +413,10 @@
         };
       }
 
-      // Business agents meta (static — used as fallback and for existing business logic)
-      const BUSINESS_AGENT_META = {
-        reid: buildAgentMetaEntry("reid", REID, "CFO"),
-        leo: buildAgentMetaEntry("leo", LEO, "COO"),
-        mason: buildAgentMetaEntry("mason", MASON, "BizDev"),
-      };
-
       function buildAgentMeta() {
         const mod = getActiveModule();
-        if (!mod?.agentGroup) return BUSINESS_AGENT_META;
-
         const meta = {};
-        for (const [key, agent] of Object.entries(mod.agentGroup)) {
+        for (const [key, agent] of Object.entries(mod?.agentGroup ?? {})) {
           meta[key] = buildAgentMetaEntry(key, agent);
         }
         return meta;
@@ -648,18 +581,17 @@
       let currentChat = null;
       let messages = [];
       let ephemeralMessages = [];
-      let activeBusiness = getActiveBusiness();
       let activeModule = getActiveModule();
-      let CURRENT_CHAT_KEY = `${CURRENT_CHAT_KEY_PREFIX}-${activeModule.id}`;
-      let CHAT_HISTORY_KEY = `chatHistory_${activeModule.id}`;
-      let MEMORY_KEY = `memoryFacts_${activeModule.id}`;
+      let CURRENT_CHAT_KEY = chatSessionKeyForScope(activeModule.id);
+      let CHAT_HISTORY_KEY = chatHistoryStorageKey(activeModule.id);
+      let MEMORY_KEY = memoryFactsStorageKey(activeModule.id);
       let agentPrompts = {};
       const scopeUi = createScopeUiState();
 
       function updateStorageKeys(moduleId) {
-        CURRENT_CHAT_KEY = `${CURRENT_CHAT_KEY_PREFIX}-${moduleId}`;
-        CHAT_HISTORY_KEY = `chatHistory_${moduleId}`;
-        MEMORY_KEY = `memoryFacts_${moduleId}`;
+        CURRENT_CHAT_KEY = chatSessionKeyForScope(moduleId);
+        CHAT_HISTORY_KEY = chatHistoryStorageKey(moduleId);
+        MEMORY_KEY = memoryFactsStorageKey(moduleId);
       }
 
       function activeModuleScopeId() {
@@ -773,9 +705,6 @@
           moduleId: activeModule.id,
           moduleType: activeModule.moduleType,
           moduleName: activeModule.displayName,
-          ...(isBusinessModule(activeModule.id)
-            ? { businessId: activeBusiness.id }
-            : {}),
         };
       }
 
@@ -881,9 +810,7 @@
           const group = messagesEl.querySelector(
             `.msg-group.agent[data-message-id="${CSS.escape(message.id)}"]`
           );
-          sourceBubble = group?.querySelector(
-            ".bubble-reid, .bubble-leo, .bubble-mason, .bubble"
-          );
+          sourceBubble = group?.querySelector(".bubble");
         }
 
         if (!sourceBubble) {
@@ -961,11 +888,11 @@
 <body>
 <div class="header">
   <h1>${safeAgentName} — ${safeAgentRole}</h1>
-  <p>Iron City Cargo · ${safeChatTitle} · ${escapeHtml(exportDate)}</p>
+  <p>PolyCouncil · ${safeChatTitle} · ${escapeHtml(exportDate)}</p>
 </div>
 ${content}
 <div class="footer">
-  Iron City Cargo — Confidential
+  PolyCouncil export
 </div>
 </body>
 </html>`;
@@ -1050,7 +977,7 @@ ${content}
         if (!trimmed) return null;
 
         const cleaned = trimmed
-          .replace(/^@(reid|leo|mason|all)\s*/i, "")
+          .replace(/^@\w+\s*/i, "")
           .toLowerCase();
 
         if (
@@ -1154,7 +1081,7 @@ ${content}
 
       function extractDocumentReferences(userRequest) {
         const cleaned = (userRequest ?? "")
-          .replace(/^@(reid|leo|mason|all)\s*/i, "")
+          .replace(/^@\w+\s*/i, "")
           .toLowerCase();
         const refs = new Set();
 
@@ -1354,7 +1281,8 @@ ${content}
       }
 
       function getTaggedAgentFromText(text) {
-        const match = (text ?? "").match(/@(reid|leo|mason)\b/i);
+        const keys = Object.keys(AGENT_META).join("|");
+        const match = (text ?? "").match(new RegExp(`@(${keys})\\b`, "i"));
         return match ? match[1].toLowerCase() : null;
       }
 
@@ -1362,9 +1290,8 @@ ${content}
         const taggedAgent = getTaggedAgentFromText(messageText);
         if (taggedAgent) return taggedAgent;
         if (sourceMessage?.agent) return sourceMessage.agent;
-        if (exportType === "word") return "mason";
-        if (exportType === "excel" || exportType === "csv") return "reid";
-        return "mason";
+        const firstAgent = Object.keys(AGENT_META)[0];
+        return firstAgent ?? "strategist";
       }
 
       function getLastExportableAgentMessage(messageList, agentName) {
@@ -1380,7 +1307,7 @@ ${content}
 
       function getLastExportableAgentBubble(agentName) {
         const bubbles = Array.from(
-          messagesEl.querySelectorAll(".bubble-reid, .bubble-leo, .bubble-mason")
+          messagesEl.querySelectorAll(".msg-group.agent .bubble")
         ).reverse();
 
         for (const bubble of bubbles) {
@@ -1421,26 +1348,15 @@ ${content}
       async function refreshAgentPrompts() {
         activeModule = getActiveModule();
         window.__activeModule = activeModule;
-        activeBusiness = isBusinessModule(activeModule.id)
-          ? getActiveBusiness()
-          : activeBusiness;
         AGENT_META = buildAgentMeta();
 
         const modId = activeModule.id;
         const memoryInput = userId
-          ? await getAgentMemory(
-              userId,
-              activeModule.moduleType === "business"
-                ? activeBusiness
-                : { id: modId }
-            )
-          : activeModule.isPortfolio
-            ? { portfolio: true, sections: [] }
-            : { portfolio: false, facts: [] };
+          ? await getAgentMemory(userId, { id: modId })
+          : { portfolio: false, facts: [] };
 
         const emptyDocContext = { textBlocks: "", mediaBlocks: [] };
-        const agentMap =
-          activeModule.agentGroup ?? { reid: REID, leo: LEO, mason: MASON };
+        const agentMap = activeModule.agentGroup ?? {};
 
         agentPrompts = {};
         for (const [key, agent] of Object.entries(agentMap)) {
@@ -1463,202 +1379,17 @@ ${content}
         renderInputHint();
       }
 
-      function closeBusinessDropdown() {
-        businessSelectMenuEl.classList.add("hidden");
-        businessSelectTriggerEl.setAttribute("aria-expanded", "false");
-      }
-
-      function openBusinessDropdown() {
-        businessSelectMenuEl.classList.remove("hidden");
-        businessSelectTriggerEl.setAttribute("aria-expanded", "true");
-      }
-
-      const MODULE_ICON_CLASSES = {
-        council: "ti-users-group",
-        stocks: "ti-chart-candlestick",
-        paris: "ti-briefcase",
-        "iron-city-cargo": "ti-truck",
-        taniva: "ti-heart-rate-monitor",
-        "hawthorne-legacy": "ti-shield-check",
-      };
-
-      /** Tabler @2.44 webfont name for stocks (no chart-candlestick glyph). */
-      const MODULE_ICON_TABLER_ALIASES = {
-        "ti-chart-candlestick": "ti-chart-candle",
-      };
-
-      function resolveModuleIconKey(moduleId, mod) {
-        return String(moduleId ?? mod?.id ?? "").trim();
-      }
-
-      function getModuleNavIconClass(moduleId, mod) {
-        const key = resolveModuleIconKey(moduleId, mod);
-        let slug = MODULE_ICON_CLASSES[key];
-        if (slug && MODULE_ICON_TABLER_ALIASES[slug]) {
-          slug = MODULE_ICON_TABLER_ALIASES[slug];
-        }
-        return slug ? `ti ${slug}` : "ti ti-circle";
-      }
-
-      /** Icon + label for module navigation (Tabler only). */
-      function buildModuleDisplay(moduleId, mod) {
-        const icon = document.createElement("span");
-        icon.className = "business-dropdown-module-icon";
-        icon.setAttribute("aria-hidden", "true");
-
-        const iconEl = document.createElement("i");
-        iconEl.className = getModuleNavIconClass(moduleId, mod);
-        iconEl.setAttribute("aria-hidden", "true");
-        icon.appendChild(iconEl);
-
-        const label = document.createElement("span");
-        label.className = "business-dropdown-module-label";
-        if (mod.isPortfolio) {
-          label.classList.add("business-dropdown-module-label--portfolio");
-        }
-        label.textContent = mod.shortName ?? mod.displayName;
-
-        const wrap = document.createDocumentFragment();
-        wrap.append(icon, label);
-        return wrap;
-      }
-
-      function mountModuleDisplay(el, moduleId, mod) {
-        el.replaceChildren(buildModuleDisplay(moduleId, mod));
-      }
-
-      function syncBusinessDropdownUI() {
-        const id = activeModule.id;
-        const mod = ALL_MODULES[id] ?? activeModule;
-        businessSelectEl.value = id;
-
-        businessSelectDisplayEl.classList.add("business-dropdown-value--module");
-        mountModuleDisplay(businessSelectDisplayEl, id, mod);
-
-        businessSelectTriggerEl.classList.toggle(
-          "business-dropdown-trigger--portfolio",
-          Boolean(mod.isPortfolio)
-        );
-
-        businessSelectMenuEl
-          .querySelectorAll(".business-dropdown-option")
-          .forEach((btn) => {
-            const selected = btn.dataset.value === id;
-            btn.classList.toggle("is-selected", selected);
-            btn.setAttribute("aria-selected", selected ? "true" : "false");
-          });
-      }
-
-      function renderBusinessSelect() {
-        businessSelectEl.innerHTML = "";
-        businessSelectMenuEl.innerHTML = "";
-
-        // Non-business top-level modules (Council, Stocks) at the top
-        const nonBizModules = Object.entries(ALL_MODULES).filter(
-          ([, mod]) => mod.moduleType !== "business"
-        );
-        if (nonBizModules.length) {
-          for (const [id, mod] of nonBizModules) {
-            appendModuleDropdownOption(id, mod, false);
-          }
-          const divider = document.createElement("div");
-          divider.className = "business-dropdown-divider";
-          divider.setAttribute("role", "separator");
-          businessSelectMenuEl.appendChild(divider);
-        }
-
-        // Business section label
-        const bizLabel = document.createElement("div");
-        bizLabel.className = "business-dropdown-section-label";
-        bizLabel.textContent = "Business";
-        businessSelectMenuEl.appendChild(bizLabel);
-
-        // Portfolio first
-        appendModuleDropdownOption("paris", ALL_MODULES.paris, true);
-
-        const divider2 = document.createElement("div");
-        divider2.className = "business-dropdown-divider";
-        divider2.setAttribute("role", "separator");
-        businessSelectMenuEl.appendChild(divider2);
-
-        // Individual businesses
-        for (const [id, mod] of Object.entries(ALL_MODULES)) {
-          if (mod.moduleType !== "business" || mod.isPortfolio) continue;
-          appendModuleDropdownOption(id, mod, false);
-        }
-
-        syncBusinessDropdownUI();
-      }
-
-      function appendModuleDropdownOption(id, mod, isPortfolio) {
-        const option = document.createElement("option");
-        option.value = id;
-        businessSelectEl.appendChild(option);
-
-        const item = document.createElement("button");
-        item.type = "button";
-        item.role = "option";
-        item.className = isPortfolio
-          ? "business-dropdown-option business-dropdown-option--portfolio"
-          : "business-dropdown-option";
-        item.dataset.value = id;
-        item.classList.add("business-dropdown-option--module");
-        if (isPortfolio) {
-          item.classList.add("business-dropdown-option--portfolio");
-        }
-        item.append(buildModuleDisplay(id, mod));
-
-        businessSelectMenuEl.appendChild(item);
-      }
-
-      function initBusinessDropdown() {
-        businessSelectTriggerEl.addEventListener("click", (event) => {
-          event.stopPropagation();
-          const isOpen =
-            businessSelectTriggerEl.getAttribute("aria-expanded") === "true";
-          if (isOpen) {
-            closeBusinessDropdown();
-          } else {
-            openBusinessDropdown();
-          }
-        });
-
-        businessSelectMenuEl.addEventListener("click", (event) => {
-          const item = event.target.closest(".business-dropdown-option");
-          if (!item?.dataset.value) return;
-          closeBusinessDropdown();
-          if (item.dataset.value !== activeModule.id) {
-            businessSelectEl.value = item.dataset.value;
-            switchModule(item.dataset.value);
-          }
-        });
-
-        document.addEventListener("click", () => closeBusinessDropdown());
-        document.addEventListener("keydown", (event) => {
-          if (event.key === "Escape") closeBusinessDropdown();
-        });
-      }
-
+      function renderBusinessSelect() {}
+      function initBusinessDropdown() {}
       function updateBusinessChrome() {
-        const sbBrand = document.getElementById("business-select-label");
-        if (sbBrand) {
-          if (activeModule.moduleType !== "business") {
-            sbBrand.textContent = activeModule.displayName;
-          } else if (activeBusiness.isPortfolio) {
-            sbBrand.textContent = "Portfolio View";
-          } else {
-            sbBrand.textContent = "Business";
-          }
+        const memTitle = document.querySelector(".mem-page-title");
+        if (memTitle) {
+          memTitle.textContent = `${activeModule.displayName} Knowledge Base`;
         }
-
-        syncBusinessDropdownUI();
-
-        navDocumentsBtn.classList.remove("hidden");
-        navMemoryBtn.classList.remove("hidden");
       }
 
       function updateDocumentTitle() {
-        document.title = "Taylor's Command Center";
+        document.title = "PolyCouncil";
       }
 
       function updateMemoryPageHeader() {
@@ -1676,7 +1407,7 @@ ${content}
 
         logChatPersist("hydrate", {
           module: { id: scopeId },
-          storageKey: `chatHistory_${scopeId}`,
+          storageKey: chatHistoryStorageKey(scopeId),
         });
 
         try {
@@ -1746,84 +1477,9 @@ ${content}
         messagesEl.innerHTML = "";
       }
 
-      async function switchModule(moduleId) {
-        if (!moduleId || moduleId === activeModule.id) return;
-        if (isWaiting) {
-          syncBusinessDropdownUI();
-          return;
-        }
+      async function switchModule(_moduleId) {}
 
-        const moduleRequestId = scopeUi.bumpModuleLoad();
-        const targetScopeId = moduleId;
-
-        clearModuleScopedUi();
-        scopeUi.loading.module = true;
-
-        setActiveModule(moduleId);
-        activeModule = getActiveModule();
-
-        if (isBusinessModule(moduleId)) {
-          activeBusiness = getActiveBusiness();
-        }
-
-        updateStorageKeys(activeModule.id);
-        applyCachedChatsForScope(targetScopeId);
-
-        await refreshAgentPrompts();
-        if (
-          !scopeUi.isModuleLoadCurrent(moduleRequestId) ||
-          targetScopeId !== getActiveModuleId()
-        ) {
-          return;
-        }
-
-        renderBusinessSelect();
-        updateBusinessChrome();
-        updateDocumentTitle();
-        updateMemoryPageHeader();
-        updateDocumentsPageHeader();
-
-        if (!activeBusiness.isPortfolio) {
-          documentsBusinessFilter = "all";
-        }
-
-        await loadModuleChatsForScope(targetScopeId, moduleRequestId);
-        if (!scopeUi.isModuleLoadCurrent(moduleRequestId)) return;
-
-        scopeUi.loading.module = false;
-        updateSendButtonState();
-        messageInput.focus();
-
-        if (activeModule.moduleType !== "business") {
-          showToast(`Switched to ${activeModule.displayName}`, 3000);
-        } else if (moduleId === "paris") {
-          showToast(
-            "Portfolio view active — Reid, Leo, and Mason can see all businesses",
-            4000
-          );
-        } else {
-          showToast(`Switched to ${activeModule.displayName}`, 3000);
-        }
-
-        if (activePage === "memory") {
-          try {
-            await loadMemoryForScope(moduleRequestId);
-          } catch (err) {
-            console.error(err);
-          }
-        }
-        if (activePage === "documents") {
-          try {
-            await loadDocumentsForScope(moduleRequestId);
-          } catch (err) {
-            console.error(err);
-          }
-        }
-      }
-
-      async function switchBusiness(businessId) {
-        return switchModule(businessId);
-      }
+      async function switchBusiness(_businessId) {}
 
       function showToast(message, durationMs = 4000) {
         let toast = document.getElementById("export-toast");
@@ -1916,7 +1572,7 @@ ${content}
             `.msg-group.agent[data-message-id="${CSS.escape(message.id)}"]`
           );
           const bubbleFromMessage = group?.querySelector(
-            ".bubble-reid, .bubble-leo, .bubble-mason, .bubble"
+            ".bubble"
           );
           if (bubbleFromMessage?.querySelector("table")) {
             return bubbleFromMessage;
@@ -1924,7 +1580,7 @@ ${content}
         }
 
         const agentBubbles = Array.from(
-          messagesEl.querySelectorAll(".bubble-reid, .bubble-leo, .bubble-mason")
+          messagesEl.querySelectorAll(".msg-group.agent .bubble")
         ).reverse();
 
         for (const bubble of agentBubbles) {
@@ -1951,7 +1607,7 @@ ${content}
             `.msg-group.agent[data-message-id="${CSS.escape(message.id)}"]`
           );
           const bubbleFromMessage = group?.querySelector(
-            ".bubble-reid, .bubble-leo, .bubble-mason, .bubble"
+            ".bubble"
           );
           if (bubbleFromMessage) return bubbleFromMessage;
         }
@@ -2136,7 +1792,7 @@ ${content}
           .slice(-limit)
           .map((entry) => {
             if (entry.role === "user") {
-              return `Taylor: ${entry.content}`;
+              return `You: ${entry.content}`;
             }
             const name = AGENT_META[entry.agent]?.name || entry.agent;
             return `${name}: ${stripAgentNamePrefix(entry.content)}`;
@@ -2636,12 +2292,9 @@ ${content}
           AGENT_META[sourceAgent]?.name ||
           sourceAgent.charAt(0).toUpperCase() + sourceAgent.slice(1);
         const followUp = buildFlagFollowUpUserMessage(sourceName, flagContext);
-        const memoryInput = await getAgentMemory(
-          userId,
-          activeModule.moduleType === "business"
-            ? activeBusiness
-            : { id: activeModule.id }
-        );
+        const memoryInput = await getAgentMemory(userId, {
+          id: activeModule.id,
+        });
         const content = await getAgentResponse(
           targetAgent,
           history,
@@ -2992,18 +2645,7 @@ ${content}
       }
 
       function getDocumentBusinessTargets() {
-        if (activeModule.moduleType !== "business") {
-          return [
-            { id: activeModule.id, displayName: activeModule.displayName },
-          ];
-        }
-        if (activeBusiness.isPortfolio && activeBusiness.businesses?.length) {
-          return activeBusiness.businesses.map((biz) => ({
-            id: biz.id,
-            displayName: biz.displayName,
-          }));
-        }
-        return [{ id: activeBusiness.id, displayName: activeBusiness.displayName }];
+        return [{ id: activeModule.id, displayName: activeModule.displayName }];
       }
 
       function formatVisibleAgents(metadata) {
@@ -3093,8 +2735,7 @@ ${content}
           businessId,
         } = pendingDocUpload;
         const businessTargets = getDocumentBusinessTargets();
-        const showBusinessPicker =
-          activeBusiness.isPortfolio && businessTargets.length > 1;
+        const showBusinessPicker = false;
 
         const activeTagOptions =
           activeModule?.docTagOptions ?? DOC_TAG_OPTIONS;
@@ -3217,9 +2858,8 @@ ${content}
 
       function renderDocumentsPanelContent(groups) {
         updateDocumentsPageHeader();
-        const isPortfolio =
-          activeBusiness.isPortfolio && getDocumentBusinessTargets().length > 1;
-        const businessName = activeBusiness.displayName;
+        const businessName = activeModule.displayName;
+        const isPortfolio = false;
 
         let filterBar = "";
         if (isPortfolio) {
@@ -3497,7 +3137,7 @@ ${content}
           description: "",
           selectedTags,
           suggestedTags,
-          businessId: targets[0]?.id ?? activeBusiness.id,
+          businessId: targets[0]?.id ?? activeModule.id,
         };
         await renderDocumentsPanel();
       }
@@ -3514,7 +3154,7 @@ ${content}
         const description = descInput?.value?.trim() ?? "";
         const tags = [...pendingDocUpload.selectedTags];
         const businessId =
-          businessSelect?.value ?? pendingDocUpload.businessId ?? activeBusiness.id;
+          businessSelect?.value ?? pendingDocUpload.businessId ?? activeModule.id;
 
         if (!tags.length) {
           showDocFormError("Select at least one tag so agents know when to use this file.");
@@ -3740,8 +3380,6 @@ ${content}
           text = getAutoPlaceholder(files);
         }
 
-        text = applyUspsFastTrack(text, files);
-
         const exportType = detectExportKeyword(text);
 
         const attachmentsMeta = files.length
@@ -3820,72 +3458,7 @@ ${content}
             return;
           }
 
-          const route =
-            activeModule.moduleType === "stocks"
-              ? await detectAgent(text, attachmentsMeta ?? [])
-              : null;
-
-          const routeResolved =
-            route ?? (await detectAgent(text, attachmentsMeta ?? []));
-
-          let liveMarketContext = null;
-
-          if (
-            activeModule.moduleType === "stocks" &&
-            (routeResolved === "sage" || routeResolved === "all")
-          ) {
-            try {
-              showToast("Fetching live market data…", 3000);
-              liveMarketContext = await buildLiveMarketContext();
-              console.log(
-                "LIVE MARKET CONTEXT RETURNED",
-                liveMarketContext
-              );
-              console.log(
-                "FORMATTED CONTEXT",
-                liveMarketContext?.formattedContext
-              );
-              console.log(
-                "SAGE CONTEXT",
-                JSON.stringify(
-                  {
-                    route: routeResolved,
-                    success: liveMarketContext?.success,
-                    macroCalendar: liveMarketContext?.macroCalendar ?? null,
-                    macroCalendarStatus:
-                      liveMarketContext?.macroCalendarStatus ?? {},
-                    calendarErrors: liveMarketContext?.calendarErrors ?? [],
-                    hasFormattedContext: Boolean(
-                      liveMarketContext?.formattedContext
-                    ),
-                  },
-                  null,
-                  2
-                )
-              );
-            } catch (err) {
-              console.warn(
-                "Market context fetch failed for Sage, continuing without it:",
-                err
-              );
-            }
-          } else if (
-            activeModule.moduleType === "stocks" &&
-            isMarketBriefRequest(text)
-          ) {
-            try {
-              showToast("Fetching live market data…", 3000);
-              const result = await buildLiveMarketContext();
-              if (result.success && typeof apiContent === "string") {
-                apiContent = `${result.formattedContext}\n\n---\n\nTaylor's request: ${apiContent}`;
-              }
-            } catch (err) {
-              console.warn(
-                "Market context fetch failed, continuing without it:",
-                err
-              );
-            }
-          }
+          const routeResolved = await detectAgent(text, attachmentsMeta ?? []);
 
           isTypingVisible = true;
           typingAgentKey = null;
@@ -3894,12 +3467,9 @@ ${content}
           const historyBeforeLatest = history.slice(0, -1);
 
           const primaryResponses = [];
-          const memoryInput = await getAgentMemory(
-            userId,
-            activeModule.moduleType === "business"
-              ? activeBusiness
-              : { id: activeModule.id }
-          );
+          const memoryInput = await getAgentMemory(userId, {
+            id: activeModule.id,
+          });
 
           if (routeResolved === "all") {
             isTypingVisible = false;
@@ -3910,7 +3480,6 @@ ${content}
               apiContent,
               memoryInput,
               {
-                liveMarketContext,
                 onAgentStart: async (agent) => {
                   showAgentTyping(agent);
                 },
@@ -3937,8 +3506,6 @@ ${content}
               apiContent,
               {
                 memoryFacts: memoryInput,
-                liveMarketContext:
-                  agentKey === "sage" ? liveMarketContext : null,
               }
             );
             hideAgentTyping();
@@ -4743,15 +4310,6 @@ ${content}
             chats = [];
             messagesEl.innerHTML = renderLoadError("Could not load chats", err);
           }
-
-          // Start polling for cron-generated market briefs
-          startBriefPoller(async (brief) => {
-            if (activeModule.id === "stocks") {
-              chats = await getChats(userId, "stocks");
-              renderSidebar();
-              showToast("New Sage market brief available", 4000);
-            }
-          });
 
           updateSendButtonState();
         } catch (err) {

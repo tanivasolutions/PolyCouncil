@@ -1,37 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { REID, LEO, MASON, buildRoutingPrompt } from "./agents.js";
-import { getActiveBusiness } from "./businesses/index.js";
-import {
-  getActiveModule,
-  isBusinessModule,
-  getActiveModuleId,
-} from "./modules/index.js";
-import {
-  buildDocumentContext,
-  buildPortfolioDocumentContext,
-} from "../documents/contextBuilder.js";
-
-async function buildModuleDocumentContext(
-  moduleId,
-  agentName,
-  userMessage = "",
-  conversationHistory = []
-) {
-  try {
-    return await buildDocumentContext(moduleId, agentName, {
-      userMessage,
-      conversationHistory,
-    });
-  } catch (err) {
-    console.error("Module document context load failed:", err);
-    return { textBlocks: "", mediaBlocks: [] };
-  }
-}
+import { getActiveModule } from "./modules/index.js";
+import { buildDocumentContext } from "../documents/contextBuilder.js";
 import {
   buildRoutingDescription,
-  routeFromFiles,
 } from "./attachments.js";
-import { buildSageSystemLiveBlock } from "./market-context.js";
 import {
   addMemoryFact,
   createChat,
@@ -86,26 +58,15 @@ export {
 
 const MODEL = "claude-sonnet-4-6";
 
-// Business agents — used when active module is a business
-const BUSINESS_AGENTS = {
-  reid: REID,
-  leo: LEO,
-  mason: MASON,
-};
-
 const anthropic = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
-// Returns the agent map for the currently active module
 function getAgentMap() {
-  const mod = getActiveModule();
-  if (mod?.agentGroup) return mod.agentGroup;
-  return BUSINESS_AGENTS;
+  return getActiveModule().agentGroup ?? {};
 }
 
-// Returns ordered agent keys for @all broadcast
 function getAllAgentKeys() {
   return Object.keys(getAgentMap());
 }
@@ -154,51 +115,25 @@ function buildUserMessageContent(userMessage, mediaBlocks = []) {
   return blocks;
 }
 
-async function loadDocumentContext(
-  biz,
+async function buildModuleDocumentContext(
+  moduleId,
   agentName,
   userMessage = "",
   conversationHistory = []
 ) {
-  const empty = { textBlocks: "", mediaBlocks: [] };
-  const contextOptions = { userMessage, conversationHistory };
-
   try {
-    if (biz?.isPortfolio && biz.businesses?.length) {
-      const result = await buildPortfolioDocumentContext(
-        biz.businesses,
-        agentName,
-        contextOptions
-      );
-      console.log("[documents] loadDocumentContext (portfolio)", {
-        moduleId: getActiveModuleId(),
-        businessScopes: biz.businesses.map((b) => b.id),
-        agentName,
-        textBlocksPopulated: Boolean(result?.textBlocks?.trim()),
-      });
-      return result;
-    }
-    const businessId = biz?.id;
-    if (!businessId) return empty;
-    return await buildDocumentContext(businessId, agentName, contextOptions);
+    return await buildDocumentContext(moduleId, agentName, {
+      userMessage,
+      conversationHistory,
+    });
   } catch (err) {
-    console.error("Document context load failed:", err);
-    return empty;
+    console.error("Module document context load failed:", err);
+    return { textBlocks: "", mediaBlocks: [] };
   }
 }
 
-function getMaxTokens(messageText, agentName) {
+function getMaxTokens(messageText) {
   const messageStr = getMessageTextForTokens(messageText).toLowerCase();
-
-  if (
-    messageStr.includes("hcr") ||
-    messageStr.includes("solicitation") ||
-    messageStr.includes("usps") ||
-    messageStr.includes("bid analysis") ||
-    messageStr.includes("ps7435") ||
-    messageStr.includes("ps 7435")
-  )
-    return 8096;
 
   if (messageStr.includes("@all")) return 1024;
 
@@ -207,8 +142,7 @@ function getMaxTokens(messageText, agentName) {
     messageStr.includes("full") ||
     messageStr.includes("complete") ||
     messageStr.includes("detailed") ||
-    messageStr.includes("executive summary") ||
-    messageStr.includes("segment entry")
+    messageStr.includes("executive summary")
   )
     return 4096;
 
@@ -248,7 +182,6 @@ async function createAgentResponseWithContinuation({
   userMessage,
   maxTokens,
   mediaBlocks = [],
-  debugLabel = null,
 }) {
   const trimmedHistory = conversationHistory.slice(-10);
   const userContent = buildUserMessageContent(userMessage, mediaBlocks);
@@ -260,11 +193,6 @@ async function createAgentResponseWithContinuation({
     system,
     messages,
   };
-
-  if (debugLabel === "sage") {
-    console.log("FINAL SAGE SYSTEM PROMPT", system);
-    console.log("FINAL CLAUDE PAYLOAD", payload);
-  }
 
   const response = await createAnthropicMessage(payload);
 
@@ -299,7 +227,6 @@ function normalizeAgentName(name, agentMap) {
   const map = agentMap ?? getAgentMap();
   const key = name?.trim().toLowerCase();
   if (key in map) return key;
-  // Fallback: find first key that starts with the input
   const match = Object.keys(map).find((k) => k.startsWith(key ?? ""));
   return match ?? Object.keys(map)[0];
 }
@@ -328,15 +255,10 @@ function parseJsonArray(text) {
   return [];
 }
 
-// ---------------------------------------------------------------------------
-// Routing
-// ---------------------------------------------------------------------------
-
 export async function detectAgent(messageText, fileHints = []) {
   const mod = getActiveModule();
   const agentKeys = Object.keys(getAgentMap());
 
-  // Build @mention regex from active agent keys
   const keyPattern = agentKeys.join("|");
   const mentionMatch = messageText
     .trim()
@@ -347,16 +269,8 @@ export async function detectAgent(messageText, fileHints = []) {
     return tag === "all" ? "all" : tag;
   }
 
-  // File routing only applies to business modules
-  if (mod.moduleType === "business") {
-    const fileRoute = routeFromFiles(fileHints, messageText);
-    if (fileRoute) return fileRoute;
-  }
-
   const routingText = buildRoutingDescription(messageText, fileHints);
-  const routingPrompt = mod.buildRoutingPrompt
-    ? mod.buildRoutingPrompt()
-    : buildRoutingPrompt(getActiveBusiness());
+  const routingPrompt = mod.buildRoutingPrompt?.() ?? "";
 
   const response = await anthropic.messages.create({
     model: MODEL,
@@ -368,10 +282,6 @@ export async function detectAgent(messageText, fileHints = []) {
   return normalizeAgentName(extractText(response));
 }
 
-// ---------------------------------------------------------------------------
-// Agent responses
-// ---------------------------------------------------------------------------
-
 export async function getAgentResponse(
   agentName,
   conversationHistory,
@@ -382,7 +292,6 @@ export async function getAgentResponse(
     userId = null,
     memoryFacts: prefetchedMemory = null,
     broadcastInstruction = null,
-    liveMarketContext = null,
   } = options;
 
   const mod = getActiveModule();
@@ -398,37 +307,18 @@ export async function getAgentResponse(
   }
   memoryFacts = memoryFacts ?? [];
 
-  let docContext;
-  if (mod.moduleType === "business") {
-    const biz = getActiveBusiness();
-    docContext = await loadDocumentContext(
-      biz,
-      agent.name,
-      userMessage,
-      conversationHistory
-    );
-  } else {
-    docContext = await buildModuleDocumentContext(
-      mod.id,
-      agent.name,
-      userMessage,
-      conversationHistory
-    );
-  }
+  const docContext = await buildModuleDocumentContext(
+    mod.id,
+    agent.name,
+    userMessage,
+    conversationHistory
+  );
 
-  const docScopeId =
-    mod.moduleType === "business"
-      ? (getActiveBusiness().isPortfolio ? "portfolio" : getActiveBusiness().id)
-      : mod.id;
   console.log("[documents] agent prompt", {
     moduleType: mod.moduleType,
     moduleId: mod.id,
-    docScopeId,
     agentName: agent.name,
-    metadataKey:
-      mod.moduleType === "business" && !getActiveBusiness().isPortfolio
-        ? `docs_meta_${getActiveBusiness().id}`
-        : `docs_meta_${mod.id}`,
+    metadataKey: `pc-docs_meta_${mod.id}`,
     textBlocksPopulated: Boolean(docContext?.textBlocks?.trim()),
     textBlocksLength: docContext?.textBlocks?.length ?? 0,
   });
@@ -441,22 +331,12 @@ export async function getAgentResponse(
     system = `${system}\n\n${broadcastInstruction}`;
   }
 
-  if (agent.supportsLiveContext && liveMarketContext?.formattedContext) {
-    const liveBlock = buildSageSystemLiveBlock(liveMarketContext);
-    if (liveBlock) {
-      system = `${system}\n\n---\n\n${liveBlock}`;
-    }
-    console.log("LIVE MARKET CONTEXT RETURNED", liveMarketContext);
-    console.log("FORMATTED CONTEXT", liveMarketContext.formattedContext);
-  }
-
   return createAgentResponseWithContinuation({
     system,
     conversationHistory,
     userMessage,
-    maxTokens: getMaxTokens(userMessage, agentKey),
+    maxTokens: getMaxTokens(userMessage),
     mediaBlocks: docContext.mediaBlocks ?? [],
-    debugLabel: agent.supportsLiveContext ? "sage" : null,
   });
 }
 
@@ -464,13 +344,14 @@ export async function getAllAgentsResponse(
   conversationHistory,
   userMessage,
   memoryInput,
-  { onResponse, onAgentStart, liveMarketContext = null } = {}
+  { onResponse, onAgentStart } = {}
 ) {
   const results = [];
   const sharedMemory = memoryInput ?? [];
   const mod = getActiveModule();
   const broadcastInstructions = mod.broadcastInstructions ?? {};
   const agentKeys = getAllAgentKeys();
+  const agentMap = getAgentMap();
 
   for (let i = 0; i < agentKeys.length; i++) {
     const agentName = agentKeys[i];
@@ -488,8 +369,6 @@ export async function getAllAgentsResponse(
       {
         memoryFacts: sharedMemory,
         broadcastInstruction: broadcastInstructions[agentName] ?? null,
-        liveMarketContext:
-          agentName === "sage" ? liveMarketContext : null,
       }
     );
 
@@ -505,12 +384,7 @@ export async function getAllAgentsResponse(
       const remaining = agentKeys.slice(i + 1);
       if (remaining.length > 0) {
         const skippedNames = remaining
-          .map((k) => {
-            const agentMap =
-              mod.agentGroup ??
-              { reid: { name: "Reid" }, leo: { name: "Leo" }, mason: { name: "Mason" } };
-            return agentMap[k]?.name ?? k;
-          })
+          .map((k) => agentMap[k]?.name ?? k)
           .join(", ");
         const lastEntry = {
           agent: agentName,
@@ -524,10 +398,6 @@ export async function getAllAgentsResponse(
 
   return results;
 }
-
-// ---------------------------------------------------------------------------
-// Memory extraction
-// ---------------------------------------------------------------------------
 
 function buildMemoryExtractionPrompt() {
   const mod = getActiveModule();

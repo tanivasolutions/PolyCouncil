@@ -1,8 +1,9 @@
 {
-  "name": "iron-city-cargo-agents",
+  "name": "polycouncil",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "Multi-perspective AI council — plug in your agents and context",
   "scripts": {
     "dev": "concurrently \"vite\" \"node server.js\"",
     "dev:frontend": "vite",

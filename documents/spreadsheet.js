@@ -194,7 +194,7 @@ export function resolveSpreadsheetInjectionTier(rowCount, metadata, agentName) {
     .toLowerCase();
   const hasRatesTag = tags.includes("rates");
   const minPreviewAgent =
-    hasRatesTag && (agent === "reid" || agent === "mason");
+    hasRatesTag && ["strategist", "pragmatist"].includes(agent);
 
   if (rowCount < SPREADSHEET_FULL_ROW_THRESHOLD) {
     return "full";

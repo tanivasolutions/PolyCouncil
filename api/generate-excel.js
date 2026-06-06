@@ -156,7 +156,7 @@ export default async function handler(req, res) {
         );
         res.setHeader(
           "Content-Disposition",
-          'attachment; filename="iron-city-cargo.xlsx"'
+          'attachment; filename="polycouncil-export.xlsx"'
         );
         return res.send(Buffer.from(buffer));
       }
@@ -172,7 +172,7 @@ export default async function handler(req, res) {
     const sourceText =
       textContent.trim() ||
       `${context}\n\n${prompt}`.trim() ||
-      "Iron City Cargo export";
+      "PolyCouncil export";
 
     const rows = parseTextToRows(sourceText);
     const worksheet = XLSX.utils.aoa_to_sheet(rows);
@@ -186,7 +186,7 @@ export default async function handler(req, res) {
     );
     res.setHeader(
       "Content-Disposition",
-      'attachment; filename="iron-city-cargo.xlsx"'
+      'attachment; filename="polycouncil-export.xlsx"'
     );
     return res.send(buffer);
   } catch (err) {

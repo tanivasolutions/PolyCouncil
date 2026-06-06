@@ -1,119 +1,101 @@
-# Iron City Cargo — Agent Group Chat
+# PolyCouncil
 
-Multi-agent chat for Iron City Cargo with Reid (CFO), Leo (COO), and Mason (Business Development).
+Multi-perspective AI council for any domain. Drop in your agents, add your context, deploy in minutes.
 
-## Local development
+PolyCouncil runs a panel of AI perspectives on your questions — each agent has a distinct cognitive lens, they respond in parallel on `@all`, and their answers can be synthesized into a council report. Memory, documents, auth, and cloud sync are built in.
 
-1. Install dependencies:
+## What you get out of the box
+
+- **Multi-agent chat** — parallel agent firing, `@mention` routing, auto-routing, streaming markdown replies
+- **Shared memory** — facts extracted from conversations, synced to Supabase with localStorage cache
+- **Document uploads** — IndexedDB + Supabase storage; tagged files injected into agent prompts
+- **Auth** — Supabase email/password login and profiles
+- **Persistence** — chats and messages in Supabase (scoped per council module)
+- **Deploy** — Vite frontend + Express file-export API, ready for Vercel
+
+## Quick start
+
+### 1. Clone and install
 
 ```bash
+git clone <your-repo-url> polycouncil
+cd polycouncil
 npm install
 ```
 
-2. Create `.env.local` in the project root:
+### 2. Environment variables
 
-```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_ANTHROPIC_API_KEY=your_anthropic_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
+Copy `.env.example` to `.env.local` and fill in your keys:
+
+```bash
+cp .env.example .env.local
 ```
 
-`ANTHROPIC_API_KEY` is used by the backend file-generation server (Excel/Word). It can be the same value as `VITE_ANTHROPIC_API_KEY`.
+| Variable | Description |
+|----------|-------------|
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `VITE_ANTHROPIC_API_KEY` | Anthropic API key (browser — dev only; use a backend proxy in production) |
+| `ANTHROPIC_API_KEY` | Anthropic API key for the Express file-generation server |
 
-If your database was created before file uploads were added, run this in the Supabase SQL Editor:
+### 3. Supabase setup
 
-```sql
-alter table public.messages add column if not exists attachments jsonb;
-```
+In the Supabase SQL Editor, run these files **in order**:
 
-3. Run the Supabase setup script (`supabase-setup.sql`) in your Supabase SQL Editor if you have not already.
+1. `supabase-setup.sql` — core tables (profiles, chats, messages, memory)
+2. `supabase-chats-cloud.sql` — scope columns for multi-module chat history
+3. `supabase-memory-cloud.sql` — scope columns for memory
+4. `supabase-documents.sql` — document metadata table + storage bucket policies
+5. `supabase-user-preferences.sql` — optional UI preferences (if present)
+6. `supabase-backfill-profiles.sql` — one-time profile backfill for existing users (if needed)
 
-4. Start local development (frontend + file-generation API):
+Create a Supabase Auth user via the dashboard (Authentication → Users → Add user).
+
+### 4. Run locally
 
 ```bash
 npm run dev
 ```
 
-- Vite frontend: http://localhost:5173
-- Express file API: http://localhost:3001 (proxied via Vite at `/api/*`)
+Opens the Vite app at `http://localhost:5173` and the file API at `http://localhost:3001`.
 
-Or run them separately:
+Sign in at `/` — you’ll land on the council chat with three example agents: **Strategist**, **Skeptic**, and **Pragmatist**.
 
-```bash
-npm run dev:frontend   # Vite only (Excel/Word buttons will not work)
-npm run server         # file API only
-```
+## Customize your agents
+
+Edit `src/data/example-agents.js`. Each agent has:
+
+- `slug` — used for `@mentions`, themes, and routing
+- `name`, `role`, `description` — UI labels
+- `buildContext()` / `shortBuildContext()` — system prompt assembly
+
+Replace `[YOUR CONTEXT HERE]` in each prompt with your domain, business, or expertise. See `CUSTOMIZATION.md` for the full guide.
+
+### Add more agents
+
+1. Copy an agent object in `example-agents.js` and add it to `EXAMPLE_AGENTS`
+2. Add the slug to `COUNCIL_THEME_KEYS` in `src/agent-themes.js`
+3. Add theme CSS variables in `src/styles.css` and classes in `src/agent-theme-styles.css`
+4. Update `buildExampleRoutingPrompt()` and `EXAMPLE_BROADCAST_INSTRUCTIONS`
+5. Add `agentTagKeywords` entries in `src/modules/council.js` for document tagging
 
 ## Deploy to Vercel
 
-1. Connect the repository to Vercel.
-2. Add these environment variables in the Vercel project settings:
+1. Push the repo to GitHub
+2. Import the project in Vercel
+3. Set the same environment variables as `.env.local`
+4. Deploy — `vercel.json` rewrites routes to the SPA and runs the build
 
-| Variable | Description |
-| --- | --- |
-| `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
-| `VITE_ANTHROPIC_API_KEY` | Anthropic API key (browser chat) |
-| `ANTHROPIC_API_KEY` | Anthropic API key (serverless Excel/Word generation) |
+Run the Supabase SQL migrations on your production Supabase project before first use.
 
-3. In the Supabase SQL editor, run (after `supabase-setup.sql`):
-   - **`supabase-documents.sql`** — `agent_documents` table + `agent-documents` storage bucket
-   - **`supabase-memory-cloud.sql`** — adds `scope_id` to `memory` for per-module cloud sync
-   - **`supabase-chats-cloud.sql`** — adds `scope_id` + module fields to `chats`; relaxes `messages.agent` for all agent groups
-   - **`supabase-user-preferences.sql`** — optional; **not used** for active UI (module/chat/sidebar stay local per browser)
+## Stack
 
-4. Deploy. The frontend is served from `dist/`, and the file generation endpoints run as Vercel serverless functions:
+- React 19 + Vite
+- Supabase (auth, Postgres, storage)
+- Anthropic Claude (Sonnet)
+- Express (local file export API)
+- Vercel (hosting)
 
-- `POST /api/generate-excel`
-- `POST /api/generate-docx`
+## License
 
-## File generation
-
-Agent messages with tables can generate real `.xlsx` and `.docx` files via the Anthropic Skills API. In production, these routes are handled by Vercel serverless functions. Locally, they are served by `server.js` on port 3001 (proxied through Vite when using `npm run dev`).
-
-## Agent documents (cloud)
-
-Uploaded documents are stored in **Supabase** when you are signed in:
-
-- **Table** `agent_documents` — metadata (name, tags, module scope)
-- **Storage** bucket `agent-documents` — processed file payloads (JSON per document)
-
-The app still caches copies in the browser (IndexedDB) for speed. On first login after enabling cloud storage, any local-only files are uploaded once automatically.
-
-### Manual legacy migration (dev / admin)
-
-If documents or memory still exist only in this browser (`docs_meta_*` + IndexedDB `icc_documents`, or `memoryFacts_*`), use the **Settings** menu while signed in on **localhost** or on production with `?legacyMigration=1` in the URL:
-
-1. **Migrate documents to Supabase** — scans all `docs_meta_*` keys, reads payloads from IndexedDB, upserts to `agent_documents` + `agent-documents` bucket. Skips duplicates by `docId` or `scopeId + name + createdAt`. Does not delete local data.
-2. **Migrate memory to Supabase** — scans `memoryFacts_*`, upserts into `memory`. Skips duplicates by `scopeId + fact` text.
-
-Check the browser console for a full report (`attempted`, `migrated`, `skipped`, `failed`). After migration, refresh production while signed in as the same user — agents load documents via the existing cloud `listDocuments` → `docContext.textBlocks` path.
-
-## Agent memory (cloud)
-
-Shared knowledge-base facts sync to Supabase when signed in:
-
-- **Table** `memory` — one row per fact, keyed by `user_id` + `scope_id` (module id, e.g. `iron-city-cargo`, `stocks`, `paris`)
-- Local `memoryFacts_*` keys remain as a cache; cloud is the source of truth when online
-
-On first login, facts still in localStorage are uploaded once (`migration_memory_cloud_<userId>_done`).
-
-Run **`supabase-memory-cloud.sql`** before using cloud memory (adds the `scope_id` column).
-
-## Chat history (cloud)
-
-Chats and messages sync to Supabase when signed in:
-
-- **Table** `chats` — per `scope_id` (module id), with `module_id`, `module_type`, `module_name`
-- **Table** `messages` — linked by `chat_id`; supports all agent keys, `attachments`, `flagged_by`
-
-Local `chatHistory_*` keys remain as a cache. On first login, existing local chats upload once (`migration_chats_cloud_<userId>_done`).
-
-Run **`supabase-chats-cloud.sql`** before using cloud chats.
-
-## Active UI vs durable data
-
-**Per browser only** (localStorage / sessionStorage): active module, business, open chat, sidebar — localhost and production do not affect each other.
-
-**Supabase when signed in**: chats, messages, memory, documents. Cron **Sage briefs** use `importMarketBriefPayload()` so they sync to cloud `chats`/`messages`.
+MIT — customize freely for your own use case.

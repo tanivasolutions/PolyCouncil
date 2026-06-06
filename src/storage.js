@@ -1,6 +1,11 @@
 import { migrateDocumentMetadataV2 as runDocumentMetadataMigrationV2 } from "../documents/documentStore.js";
-import { getActiveBusiness } from "./businesses/index.js";
 import { getActiveModuleId } from "./modules/index.js";
+import {
+  MIGRATION_V1_DONE_KEY,
+  chatHistoryStorageKey,
+  memoryFactsStorageKey,
+  migrateStorageKeyPrefix,
+} from "./storage-keys.js";
 
 let cloudStorageUserId = null;
 
@@ -25,46 +30,40 @@ function capitalizeAgent(agent) {
 }
 
 const LEADING_AGENT_PREFIX =
-  /^[\s\uFEFF]*(?:(?:\*\*)?\[(?:reid|leo|mason)\](?:\*\*)?\s*[:\-—–]?\s*)+/i;
+  /^[\s\uFEFF]*(?:(?:\*\*)?\[[^\]]+\](?:\*\*)?\s*[:\-—–]?\s*)+/i;
 
 export function stripAgentNamePrefix(content) {
   if (!content || typeof content !== "string") return content;
   return content.replace(LEADING_AGENT_PREFIX, "").trimStart();
 }
 
-/** Storage scope: module id (business, council, stocks, etc.). */
+/** Storage scope: module id (e.g. council). */
 function resolveScopeId(scopeId) {
   return scopeId ?? getActiveModuleId();
 }
 
-const MIGRATION_V1_DONE_KEY = "migration_v1_done";
-
-/** One-time copy of pre-refactor localStorage keys into per-business ICC keys. */
+/** One-time localStorage migrations (legacy keys → pc- prefix). */
 export function migrateOldData() {
-  if (typeof localStorage === "undefined") {
-    return;
-  }
+  if (typeof localStorage === "undefined") return;
 
-  if (localStorage.getItem(MIGRATION_V1_DONE_KEY)) {
-    return;
-  }
+  migrateStorageKeyPrefix();
 
-  const migrations = [
-    { from: "chatHistory", to: "chatHistory_iron-city-cargo" },
-    { from: "memoryFacts", to: "memoryFacts_iron-city-cargo" },
-    { from: "currentChatId", to: "currentChatId_iron-city-cargo" },
-    { from: "chatHistory_surine-advisors", to: "chatHistory_hawthorne-legacy" },
-    { from: "memoryFacts_surine-advisors", to: "memoryFacts_hawthorne-legacy" },
-    { from: "docs_meta_surine-advisors", to: "docs_meta_hawthorne-legacy" },
+  if (localStorage.getItem(MIGRATION_V1_DONE_KEY)) return;
+
+  const councilChatKey = chatHistoryStorageKey("council");
+  const councilMemoryKey = memoryFactsStorageKey("council");
+  const legacyMigrations = [
+    { from: "chatHistory", to: councilChatKey },
+    { from: "memoryFacts", to: councilMemoryKey },
+    { from: "pc-chatHistory_council", to: councilChatKey },
+    { from: "pc-memoryFacts_council", to: councilMemoryKey },
   ];
 
-  for (const { from, to } of migrations) {
+  for (const { from, to } of legacyMigrations) {
     const existing = localStorage.getItem(from);
     const alreadyMigrated = localStorage.getItem(to);
-
     if (existing && !alreadyMigrated) {
       localStorage.setItem(to, existing);
-      console.log(`Migrated ${from} → ${to}`);
     }
   }
 
@@ -111,9 +110,7 @@ export async function syncLocalChatsToCloud() {
 // Chats (per-business — localStorage)
 // ---------------------------------------------------------------------------
 
-export function chatHistoryStorageKey(businessId) {
-  return `chatHistory_${businessId}`;
-}
+export { chatHistoryStorageKey, memoryFactsStorageKey } from "./storage-keys.js";
 
 function emptyChatStore() {
   return { chats: [], messages: {} };
@@ -321,58 +318,6 @@ export async function getMessages(chatId, businessId) {
   return store.messages[chatId] ?? [];
 }
 
-/** Merge a server-generated Sage brief into the stocks (or scoped) chat store. */
-export function importMarketBriefPayload(payload) {
-  if (!payload?.success || !payload.chat?.id || !Array.isArray(payload.messages)) {
-    return { imported: false };
-  }
-
-  const scopeId = (payload.storageKey ?? "chatHistory_stocks").replace(
-    /^chatHistory_/,
-    ""
-  );
-  const store = readChatStore(scopeId);
-
-  if (store.chats.some((row) => row.id === payload.chat.id)) {
-    return { imported: false, reason: "duplicate" };
-  }
-
-  const now = payload.chat.updated_at ?? new Date().toISOString();
-  const chat = {
-    ...payload.chat,
-    user_id: payload.chat.user_id ?? "market-brief-cron",
-    created_at: payload.chat.created_at ?? now,
-    updated_at: now,
-    moduleId: scopeId,
-    moduleType: "stocks",
-    moduleName: "Stocks",
-  };
-
-  store.chats.unshift(chat);
-  store.messages[chat.id] = payload.messages.map((message) => ({
-    ...message,
-    user_id: message.user_id ?? chat.user_id,
-    chat_id: chat.id,
-  }));
-  store.chats = sortChatsNewestFirst(store.chats);
-  writeChatStore(scopeId, store);
-
-  if (isCloudChatsEnabled()) {
-    void cloudChat()
-      .then(async (m) => {
-        await m.cloudUpsertChat(scopeId, chat);
-        for (const message of store.messages[chat.id] ?? []) {
-          await m.cloudInsertMessage(message);
-        }
-      })
-      .catch((err) => {
-        console.warn("[chats] Market brief cloud sync failed:", err);
-      });
-  }
-
-  return { imported: true, chatId: chat.id };
-}
-
 export async function saveMessage(
   chatId,
   userId,
@@ -449,10 +394,6 @@ export async function getMessagesForContext(chatId, businessId) {
 // Memory (per-business knowledge base — localStorage)
 // ---------------------------------------------------------------------------
 
-export function memoryFactsStorageKey(businessId) {
-  return `memoryFacts_${businessId}`;
-}
-
 function readMemoryStore(businessId) {
   if (typeof localStorage === "undefined") {
     return [];
@@ -512,39 +453,12 @@ async function loadMemoryForScope(scopeId) {
   return readMemoryStore(scopeId);
 }
 
-/** Memory for agent prompts — all scoped stores in portfolio mode, one store otherwise. */
+/** Memory for agent prompts — shared knowledge base for the active scope. */
 export async function getAgentMemory(userId, biz) {
   void userId;
-  const business =
-    typeof biz === "string" ? { id: biz } : (biz ?? getActiveBusiness());
-  const active = business.isPortfolio
-    ? business
-    : business.id
-      ? business
-      : getActiveBusiness();
-
-  if (active.isPortfolio) {
-    const sections = [
-      {
-        label: "PARIS Portfolio",
-        sectionKind: "portfolio",
-        facts: await loadMemoryForScope("paris"),
-      },
-    ];
-
-    for (const b of active.businesses ?? []) {
-      sections.push({
-        label: b.displayName,
-        sectionKind: "shared",
-        facts: await loadMemoryForScope(b.id),
-      });
-    }
-
-    return { portfolio: true, sections };
-  }
-
-  const bizId = active.id ?? resolveScopeId();
-  return { portfolio: false, facts: await loadMemoryForScope(bizId) };
+  const scopeId =
+    typeof biz === "string" ? biz : (biz?.id ?? resolveScopeId());
+  return { portfolio: false, facts: await loadMemoryForScope(scopeId) };
 }
 
 export async function addMemoryFact(

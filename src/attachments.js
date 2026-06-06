@@ -8,18 +8,9 @@ const TEXT_EXTENSIONS = new Set(["txt", "md", "csv"]);
 const BINARY_OFFICE_EXTENSIONS = new Set(["doc", "docx", "xls", "xlsx"]);
 const PDF_EXTENSIONS = new Set(["pdf"]);
 
-const FINANCIAL_KEYWORDS =
-  /\b(cash|margin|revenue|budget|financial|p&l|profit|runway|forecast|expense|invoice|ar|ap|factoring)\b/i;
-const COMPLIANCE_KEYWORDS =
-  /\b(compliance|inspection|hos|dot|credential|paperwork|permit|license|maintenance|fleet|driver)\b/i;
-
 export function getFileExtension(filename) {
   const parts = filename.toLowerCase().split(".");
   return parts.length > 1 ? parts.pop() : "";
-}
-
-export function isUspsSolicitation(filename) {
-  return /hcr|solicitation|usps|ps7435/i.test(filename);
 }
 
 export function getFileCategory(filename, mimeType = "") {
@@ -50,10 +41,6 @@ export function formatFileSize(bytes) {
 }
 
 export function getAutoPlaceholder(files) {
-  if (files.some((file) => isUspsSolicitation(file.name))) {
-    return "Please run the full USPS bid analysis on this solicitation.";
-  }
-
   const categories = files.map((file) =>
     getFileCategory(file.name, file.type)
   );
@@ -71,54 +58,11 @@ export function getAutoPlaceholder(files) {
   return "Please analyze the attached file(s).";
 }
 
-export function applyUspsFastTrack(text, files) {
-  if (!files.some((file) => isUspsSolicitation(file.name))) {
-    return text;
-  }
-
-  const prefix =
-    "@Mason — USPS solicitation attached. Please run the full bid analysis per your USPS bid analysis skill.";
-
-  if (text?.trim()) {
-    return `${prefix}\n\n${text.trim()}`;
-  }
-
-  return prefix;
+export function applyUspsFastTrack(text, _files) {
+  return text;
 }
 
-export function routeFromFiles(files, messageText = "") {
-  const names = files.map((file) => file.name).join(" ");
-  const combined = `${messageText} ${names}`;
-
-  if (files.some((file) => isUspsSolicitation(file.name))) {
-    return "mason";
-  }
-
-  const hasDataFile = files.some((file) => {
-    const category = getFileCategory(file.name, file.type);
-    return category === "csv" || category === "office";
-  });
-
-  if (hasDataFile && FINANCIAL_KEYWORDS.test(combined)) {
-    return "reid";
-  }
-
-  const hasImage = files.some(
-    (file) => getFileCategory(file.name, file.type) === "image"
-  );
-
-  if (hasImage && COMPLIANCE_KEYWORDS.test(combined)) {
-    return "leo";
-  }
-
-  const hasPdf = files.some(
-    (file) => getFileCategory(file.name, file.type) === "pdf"
-  );
-
-  if (hasPdf && !messageText.trim()) {
-    return "mason";
-  }
-
+export function routeFromFiles(_files, _messageText = "") {
   return null;
 }
 

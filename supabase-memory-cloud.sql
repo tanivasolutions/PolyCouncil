@@ -5,7 +5,7 @@ alter table public.memory
   add column if not exists scope_id text;
 
 update public.memory
-set scope_id = 'iron-city-cargo'
+set scope_id = 'council'
 where scope_id is null;
 
 alter table public.memory

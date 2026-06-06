@@ -2,9 +2,7 @@ import { getActiveModule } from "./modules/index.js";
 
 function getActiveAgentIds() {
   const mod = getActiveModule();
-  if (mod?.agentGroup) return Object.keys(mod.agentGroup);
-  // Business fallback
-  return ["reid", "leo", "mason"];
+  return Object.keys(mod?.agentGroup ?? {});
 }
 
 function agentDisplayName(agentId, mod) {
@@ -91,27 +89,6 @@ export function detectAgentFlags(sourceAgent, text) {
         extractParagraphAfter(text, match.index + match[0].length) ||
         match[0].trim();
       add(target, context);
-    }
-  }
-
-  // Business-specific implicit patterns — only fire when in a business module
-  if (!mod?.agentGroup) {
-    const implicitPatterns = [
-      { target: "reid", pattern: /I've flagged this for Reid[.:]?\s*([^\n]+)?/gi },
-      { target: "leo", pattern: /(?:I've asked Leo|I'm asking Leo)[.:]?\s*([^\n]+)?/gi },
-      { target: "mason", pattern: /I've flagged this for Mason[.:]?\s*([^\n]+)?/gi },
-      { target: "reid", pattern: /Reid should run the numbers/gi },
-      { target: "leo", pattern: /Leo should check/gi },
-    ];
-
-    for (const { target, pattern } of implicitPatterns) {
-      const re = new RegExp(pattern.source, pattern.flags);
-      let match;
-      while ((match = re.exec(text)) !== null) {
-        const context =
-          match[1]?.trim() || extractSentenceContaining(text, re);
-        add(target, context);
-      }
     }
   }
 

@@ -1,18 +1,18 @@
 import {
-  COUNCIL_AGENTS,
-  COUNCIL_BROADCAST_INSTRUCTIONS,
-  buildCouncilRoutingPrompt,
-} from "../agent-groups/council-agents.js";
+  EXAMPLE_AGENTS,
+  EXAMPLE_BROADCAST_INSTRUCTIONS,
+  buildExampleRoutingPrompt,
+} from "../data/example-agents.js";
 
 export const COUNCIL_MODULE = {
   id: "council",
   displayName: "Council",
   moduleType: "council",
   description:
-    "Multi-perspective advisory council — six cognitive lenses on any question.",
-  agentGroup: COUNCIL_AGENTS,
-  broadcastInstructions: COUNCIL_BROADCAST_INSTRUCTIONS,
-  buildRoutingPrompt: buildCouncilRoutingPrompt,
+    "Multi-perspective advisory council — distinct lenses on any question.",
+  agentGroup: EXAMPLE_AGENTS,
+  broadcastInstructions: EXAMPLE_BROADCAST_INSTRUCTIONS,
+  buildRoutingPrompt: buildExampleRoutingPrompt,
   isPortfolio: false,
 
   docTagOptions: [
@@ -21,17 +21,13 @@ export const COUNCIL_MODULE = {
     "risk",
     "planning",
     "innovation",
-    "user-research",
-    "legal",
+    "operations",
     "financial",
     "all",
   ],
   agentTagKeywords: {
-    advocate: ["user-research", "ux", "research", "feedback", "customer"],
-    architect: ["strategy", "planning", "architecture", "systems", "all"],
-    skeptic: ["risk", "legal", "compliance", "audit", "research"],
+    strategist: ["strategy", "planning", "architecture", "systems", "all"],
+    skeptic: ["risk", "research", "audit", "compliance", "legal"],
     pragmatist: ["planning", "process", "operations", "financial"],
-    innovator: ["innovation", "research", "strategy", "market"],
-    temporal: ["planning", "strategy", "risk", "financial"],
   },
 };

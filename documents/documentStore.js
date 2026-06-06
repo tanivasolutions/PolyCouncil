@@ -1,7 +1,13 @@
 import { processDocx } from "./processors.js";
 import { buildSpreadsheetRepresentations } from "./spreadsheet.js";
 
-const DB_NAME = "icc_documents";
+import {
+  MIGRATION_DOCS_V2_DONE_KEY,
+  docMetaStorageKey,
+} from "../src/storage-keys.js";
+
+const DB_NAME = "pc_documents";
+const LEGACY_DB_NAME = "icc_documents";
 const DB_VERSION = 1;
 const STORE_NAME = "files";
 
@@ -29,27 +35,11 @@ function isCloudDocumentsEnabled() {
   return Boolean(cloudDocumentUserId);
 }
 
-export function docMetaStorageKey(businessId) {
-  return `docs_meta_${businessId}`;
-}
+export { docMetaStorageKey };
 
-const MIGRATION_DOCS_V2_DONE_KEY = "migration_docs_v2_done";
+const DOC_META_MIGRATION_PAIRS = [{ from: "docs_meta", to: docMetaStorageKey("council") }];
 
-/** Pairwise localStorage metadata copies (merge by docId; never delete sources). */
-const DOC_META_MIGRATION_PAIRS = [
-  { from: "docs_meta", to: "docs_meta_iron-city-cargo" },
-  { from: "docs_meta_surine-advisors", to: "docs_meta_hawthorne-legacy" },
-];
-
-/** Scopes that receive IndexedDB metadata reconciliation after pairwise merges. */
-const DOC_META_RECONNECT_SCOPES = [
-  "iron-city-cargo",
-  "stocks",
-  "paris",
-  "council",
-  "taniva",
-  "hawthorne-legacy",
-];
+const DOC_META_RECONNECT_SCOPES = ["council"];
 
 function metaStorageKey(businessId) {
   return docMetaStorageKey(businessId);

@@ -14,7 +14,7 @@ export function isCloudChatEnabled() {
 }
 
 function cloudSyncFlagKey(userId) {
-  return `migration_chats_cloud_${userId}_done`;
+  return `pc-migration-chats-cloud-${userId}-done`;
 }
 
 function chatRowToLocal(row) {
@@ -230,9 +230,9 @@ export async function syncLocalChatsToCloud() {
 
   for (let i = 0; i < localStorage.length; i += 1) {
     const key = localStorage.key(i);
-    if (!key?.startsWith("chatHistory_")) continue;
+    if (!key?.startsWith("pc-chatHistory_")) continue;
 
-    const scopeId = key.slice("chatHistory_".length);
+    const scopeId = key.slice("pc-chatHistory_".length);
     let store = { chats: [], messages: {} };
 
     try {

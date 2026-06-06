@@ -1,6 +1,6 @@
 /** UI-only keys — localStorage/sessionStorage per browser; never synced to Supabase. */
 
-export const LAST_BRIEF_KEY = "lastMarketBriefCheck";
+export const LAST_BRIEF_KEY = "pc-lastMarketBriefCheck";
 
 let storageSourcesLogged = false;
 

@@ -14,7 +14,7 @@ export function isCloudDocumentsEnabled() {
 }
 
 function cloudSyncFlagKey(userId) {
-  return `migration_docs_cloud_${userId}_done`;
+  return `pc-migration-docs-cloud-${userId}-done`;
 }
 
 export function storagePathForDoc(userId, scopeId, docId) {
