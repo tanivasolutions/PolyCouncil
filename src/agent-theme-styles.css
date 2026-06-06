@@ -1,0 +1,245 @@
+/**
+ * Council & Stocks agent UI — mirrors reid/leo/mason patterns in styles.css.
+ * Business agents keep existing rules unchanged.
+ */
+
+/* ── Avatars ── */
+.av-advocate {
+  background: var(--agent-advocate);
+  color: var(--agent-advocate-text);
+}
+.av-architect {
+  background: var(--agent-architect);
+  color: var(--agent-architect-text);
+}
+.av-skeptic {
+  background: var(--agent-skeptic);
+  color: var(--agent-skeptic-text);
+}
+.av-pragmatist {
+  background: var(--agent-pragmatist);
+  color: var(--agent-pragmatist-text);
+}
+.av-innovator {
+  background: var(--agent-innovator);
+  color: var(--agent-innovator-text);
+}
+.av-temporal {
+  background: var(--agent-temporal);
+  color: var(--agent-temporal-text);
+}
+.av-nova {
+  background: var(--agent-nova);
+  color: var(--agent-nova-text);
+}
+.av-felix {
+  background: var(--agent-felix);
+  color: var(--agent-felix-text);
+}
+.av-sage {
+  background: var(--agent-sage);
+  color: var(--agent-sage-text);
+}
+
+/* ── Names (agent bar + message sender) ── */
+.agent-desc-name.advocate,
+.msg-sender.advocate {
+  color: var(--agent-advocate-name);
+}
+.agent-desc-name.architect,
+.msg-sender.architect {
+  color: var(--agent-architect-name);
+}
+.agent-desc-name.skeptic,
+.msg-sender.skeptic {
+  color: var(--agent-skeptic-name);
+}
+.agent-desc-name.pragmatist,
+.msg-sender.pragmatist {
+  color: var(--agent-pragmatist-name);
+}
+.agent-desc-name.innovator,
+.msg-sender.innovator {
+  color: var(--agent-innovator-name);
+}
+.agent-desc-name.temporal,
+.msg-sender.temporal {
+  color: var(--agent-temporal-name);
+}
+.agent-desc-name.nova,
+.msg-sender.nova {
+  color: var(--agent-nova-name);
+}
+.agent-desc-name.felix,
+.msg-sender.felix {
+  color: var(--agent-felix-name);
+}
+.agent-desc-name.sage,
+.msg-sender.sage {
+  color: var(--agent-sage-name);
+}
+
+/* ── In-message role chips ── */
+.tag-advocate {
+  background: var(--tag-advocate-bg);
+  color: var(--agent-advocate-name);
+}
+.tag-architect {
+  background: var(--tag-architect-bg);
+  color: var(--agent-architect-name);
+}
+.tag-skeptic {
+  background: var(--tag-skeptic-bg);
+  color: var(--agent-skeptic-name);
+}
+.tag-pragmatist {
+  background: var(--tag-pragmatist-bg);
+  color: var(--agent-pragmatist-name);
+}
+.tag-innovator {
+  background: var(--tag-innovator-bg);
+  color: var(--agent-innovator-name);
+}
+.tag-temporal {
+  background: var(--tag-temporal-bg);
+  color: var(--agent-temporal-name);
+}
+.tag-nova {
+  background: var(--tag-nova-bg);
+  color: var(--agent-nova-name);
+}
+.tag-felix {
+  background: var(--tag-felix-bg);
+  color: var(--agent-felix-name);
+}
+.tag-sage {
+  background: var(--tag-sage-bg);
+  color: var(--agent-sage-name);
+}
+
+/* ── @mention chips (input area) ── */
+.th-advocate {
+  background: var(--tag-advocate-bg);
+  color: var(--tag-advocate-text);
+  border-color: var(--border);
+}
+.th-advocate:hover {
+  background: var(--tag-advocate-hover);
+}
+.th-architect {
+  background: var(--tag-architect-bg);
+  color: var(--tag-architect-text);
+  border-color: var(--border);
+}
+.th-architect:hover {
+  background: var(--tag-architect-hover);
+}
+.th-skeptic {
+  background: var(--tag-skeptic-bg);
+  color: var(--tag-skeptic-text);
+  border-color: var(--border);
+}
+.th-skeptic:hover {
+  background: var(--tag-skeptic-hover);
+}
+.th-pragmatist {
+  background: var(--tag-pragmatist-bg);
+  color: var(--tag-pragmatist-text);
+  border-color: var(--border);
+}
+.th-pragmatist:hover {
+  background: var(--tag-pragmatist-hover);
+}
+.th-innovator {
+  background: var(--tag-innovator-bg);
+  color: var(--tag-innovator-text);
+  border-color: var(--border);
+}
+.th-innovator:hover {
+  background: var(--tag-innovator-hover);
+}
+.th-temporal {
+  background: var(--tag-temporal-bg);
+  color: var(--tag-temporal-text);
+  border-color: var(--border);
+}
+.th-temporal:hover {
+  background: var(--tag-temporal-hover);
+}
+.th-nova {
+  background: var(--tag-nova-bg);
+  color: var(--tag-nova-text);
+  border-color: var(--border);
+}
+.th-nova:hover {
+  background: var(--tag-nova-hover);
+}
+.th-felix {
+  background: var(--tag-felix-bg);
+  color: var(--tag-felix-text);
+  border-color: var(--border);
+}
+.th-felix:hover {
+  background: var(--tag-felix-hover);
+}
+.th-sage {
+  background: var(--tag-sage-bg);
+  color: var(--tag-sage-text);
+  border-color: var(--border);
+}
+.th-sage:hover {
+  background: var(--tag-sage-hover);
+}
+
+/* ── Typing indicator accent per agent ── */
+.msg-group.agent[data-agent-key="advocate"] .typing-dot {
+  background: var(--agent-advocate-name);
+}
+.msg-group.agent[data-agent-key="architect"] .typing-dot {
+  background: var(--agent-architect-name);
+}
+.msg-group.agent[data-agent-key="skeptic"] .typing-dot {
+  background: var(--agent-skeptic-name);
+}
+.msg-group.agent[data-agent-key="pragmatist"] .typing-dot {
+  background: var(--agent-pragmatist-name);
+}
+.msg-group.agent[data-agent-key="innovator"] .typing-dot {
+  background: var(--agent-innovator-name);
+}
+.msg-group.agent[data-agent-key="temporal"] .typing-dot {
+  background: var(--agent-temporal-name);
+}
+.msg-group.agent[data-agent-key="nova"] .typing-dot {
+  background: var(--agent-nova-name);
+}
+.msg-group.agent[data-agent-key="felix"] .typing-dot {
+  background: var(--agent-felix-name);
+}
+.msg-group.agent[data-agent-key="sage"] .typing-dot {
+  background: var(--agent-sage-name);
+}
+
+/* ── Name button (agent bar) — match business affordance ── */
+.agent-desc-name-btn {
+  position: relative;
+  cursor: help;
+  font: inherit;
+  line-height: inherit;
+  flex-shrink: 0;
+}
+
+.agent-desc-name-btn:focus-visible {
+  outline: 2px solid var(--input-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.tag-hint:active {
+  transform: scale(0.97);
+}
+
+.tag-hint:focus-visible {
+  outline: 2px solid var(--input-focus);
+  outline-offset: 1px;
+}

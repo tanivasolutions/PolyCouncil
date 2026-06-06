@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <title>Taylor's Command Center</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: #f5f0ff;
+        color: #2d1b69;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #ddd6fe;
+        border-radius: 16px;
+        box-shadow: none;
+        padding: 2rem 2rem 1.75rem;
+      }
+
+      .logo {
+        margin: 0;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        color: #c084fc;
+      }
+
+      .subtitle {
+        margin: 0.35rem 0 1.5rem;
+        text-align: center;
+        font-size: 1.1rem;
+        color: #6b48a0;
+      }
+
+      .form-title {
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d1b69;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #2d1b69;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: inherit;
+        color: #2d1b69;
+        background: #ffffff;
+      }
+
+      input::placeholder {
+        color: rgba(45, 27, 105, 0.5);
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #c084fc;
+        box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.15);
+      }
+
+      .btn-primary {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 500;
+        font-family: inherit;
+        color: #3b0764;
+        background: #c084fc;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: #a78bfa;
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .message {
+        margin-bottom: 1rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        display: none;
+      }
+
+      .message.visible {
+        display: block;
+      }
+
+      .message.error {
+        background: #fdecea;
+        color: #b42318;
+        border: 1px solid #f5c2c0;
+      }
+
+      .message.success {
+        background: #e8f5ee;
+        color: #1a5c38;
+        border: 1px solid #b8dcc8;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1 class="logo">Taylor's Command Center</h1>
+      <p class="subtitle">Your AI leadership team is ready.</p>
+
+      <h2 class="form-title" id="form-title">Sign In</h2>
+
+      <div id="message" class="message" role="alert"></div>
+
+      <form id="auth-form" novalidate>
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="you@example.com"
+        />
+
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          autocomplete="current-password"
+          placeholder="••••••••"
+          minlength="6"
+        />
+
+        <button type="submit" class="btn-primary" id="submit-btn">
+          Sign In
+        </button>
+      </form>
+    </div>
+
+    <script type="module">
+      import { getSession, signIn } from "/src/auth.js";
+
+      const form = document.getElementById("auth-form");
+      const submitBtn = document.getElementById("submit-btn");
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      const messageEl = document.getElementById("message");
+
+      async function redirectIfLoggedIn() {
+        try {
+          const session = await getSession();
+          if (session) {
+            window.location.href = "/chat.html";
+          }
+        } catch {
+          // stay on login page
+        }
+      }
+
+      redirectIfLoggedIn();
+
+      function showMessage(text, type) {
+        messageEl.textContent = text;
+        messageEl.className = `message visible ${type}`;
+      }
+
+      function clearMessage() {
+        messageEl.textContent = "";
+        messageEl.className = "message";
+      }
+
+      function setLoading(loading) {
+        submitBtn.disabled = loading;
+        emailInput.disabled = loading;
+        passwordInput.disabled = loading;
+        submitBtn.textContent = loading ? "Signing In…" : "Sign In";
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage();
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+          showMessage("Please enter your email and password.", "error");
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          await signIn(email, password);
+
+          const session = await getSession();
+          if (!session) {
+            throw new Error(
+              "Session could not be saved. Check that cookies/storage are enabled and try again."
+            );
+          }
+
+          window.location.href = "/chat.html";
+        } catch (err) {
+          showMessage(err.message ?? "Something went wrong. Please try again.", "error");
+        } finally {
+          setLoading(false);
+        }
+      });
+    </script>
+  </body>
+</html>

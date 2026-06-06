@@ -1,0 +1,4771 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <title>Taylor's Command Center</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body class="chat-page">
+    <button
+      type="button"
+      class="sidebar-backdrop"
+      id="sidebar-backdrop"
+      aria-label="Close menu"
+    ></button>
+
+    <div class="chat-app">
+      <!-- Left sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sb-top">
+          <div class="sb-top-main">
+            <div class="sb-app-name">Taylor's Command Center</div>
+            <div class="sb-brand-wrap">
+              <span class="sb-brand" id="business-select-label">Business</span>
+            <div class="business-dropdown" id="business-dropdown">
+              <button
+                type="button"
+                class="business-dropdown-trigger"
+                id="business-select-trigger"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-labelledby="business-select-label"
+              >
+                <span
+                  class="business-dropdown-value"
+                  id="business-select-display"
+                ></span>
+                <i
+                  class="ti ti-chevron-down business-dropdown-chevron"
+                  aria-hidden="true"
+                ></i>
+              </button>
+              <div
+                class="business-dropdown-menu hidden"
+                id="business-select-menu"
+                role="listbox"
+                aria-labelledby="business-select-label"
+              ></div>
+            </div>
+            <select
+              id="business-select"
+              class="business-select-native"
+              aria-hidden="true"
+              tabindex="-1"
+              hidden
+            ></select>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="sidebar-toggle-btn"
+            id="sidebar-toggle-btn"
+            aria-label="Collapse sidebar"
+            title="Collapse sidebar"
+          >
+            <i class="ti ti-chevrons-left" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="sb-body" id="sidebar-body">
+          <div class="sb-chats" id="chat-list"></div>
+
+          <div class="sb-nav">
+            <button type="button" class="sb-nav-item" id="nav-memory">
+              <i class="ti ti-brain" aria-hidden="true"></i>
+              <span class="sb-nav-label">Agent Memory</span>
+            </button>
+            <button type="button" class="sb-nav-item" id="nav-documents">
+              <span class="sb-nav-emoji" aria-hidden="true">📄</span>
+              <span class="sb-nav-label">Documents</span>
+            </button>
+          </div>
+
+          <div class="sb-bottom">
+            <div class="settings-wrap">
+              <button type="button" class="sb-nav-item" id="settings-btn">
+                <i class="ti ti-settings" aria-hidden="true"></i>
+                <span class="sb-nav-label">Settings</span>
+              </button>
+            </div>
+            <button type="button" class="sb-nav-item" id="export-btn">
+              <i class="ti ti-download" aria-hidden="true"></i>
+              <span class="sb-nav-label">Export chats</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sb-rail" id="sidebar-rail" aria-hidden="true">
+          <button type="button" class="sb-rail-btn" id="rail-new-chat" aria-label="New chat" title="New chat">
+            <i class="ti ti-plus" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="sb-rail-btn" id="rail-memory" aria-label="Agent Memory" title="Agent Memory">
+            <i class="ti ti-brain" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="sb-rail-btn" id="rail-documents" aria-label="Documents" title="Documents">
+            <span aria-hidden="true">📄</span>
+          </button>
+          <button type="button" class="sb-rail-btn" id="rail-settings" aria-label="Settings" title="Settings">
+            <i class="ti ti-settings" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="sb-rail-btn" id="rail-export" aria-label="Export chats" title="Export chats">
+            <i class="ti ti-download" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="settings-dropdown hidden" id="settings-dropdown">
+          <div id="legacy-migration-section" class="legacy-migration-section hidden" hidden>
+            <p class="settings-dropdown-label">Cloud migration (local only)</p>
+            <button type="button" class="settings-dropdown-item" id="migrate-legacy-docs-btn">
+              <i class="ti ti-cloud-upload" aria-hidden="true"></i>
+              Migrate documents to Supabase
+            </button>
+            <button type="button" class="settings-dropdown-item" id="migrate-legacy-memory-btn">
+              <i class="ti ti-brain" aria-hidden="true"></i>
+              Migrate memory to Supabase
+            </button>
+          </div>
+          <button type="button" class="settings-dropdown-item" id="sign-out-btn">
+            <i class="ti ti-logout" aria-hidden="true"></i>
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      <!-- Center chat -->
+      <main class="main">
+        <header class="chat-topbar">
+          <div class="chat-topbar-l">
+            <button
+              type="button"
+              class="hamburger-btn"
+              id="hamburger-btn"
+              aria-label="Open menu"
+            >
+              <i class="ti ti-menu-2" aria-hidden="true"></i>
+            </button>
+            <div class="chat-title-wrap">
+              <div class="chat-title" id="topbar-title">New Chat</div>
+              <div class="chat-subtitle" id="topbar-sub"></div>
+            </div>
+          </div>
+          <div class="topbar-actions topbar-chat-only">
+            <button type="button" class="topbar-btn" id="rename-btn">
+              <i class="ti ti-edit" aria-hidden="true"></i>
+              <span class="btn-label">Rename</span>
+            </button>
+            <button type="button" class="topbar-btn" id="export-chat-btn">
+              <i class="ti ti-download" aria-hidden="true"></i>
+              <span class="btn-label">Export</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="page active" id="page-chat">
+          <div class="agent-desc-bar">
+            <div class="agent-desc-item">
+              <div class="av av-reid">R</div>
+              <div class="agent-desc-content">
+                <span class="agent-desc-name reid">Reid</span>
+                <button type="button" class="agent-desc-role" data-agent="reid" aria-expanded="false" aria-label="CFO — Cash flow, margins, profitability, growth modeling">
+                  CFO
+                  <span class="agent-desc-tooltip" role="tooltip">Cash flow, margins, profitability, growth modeling</span>
+                </button>
+              </div>
+            </div>
+            <div class="agent-desc-divider" aria-hidden="true"></div>
+            <div class="agent-desc-item">
+              <div class="av av-leo">L</div>
+              <div class="agent-desc-content">
+                <span class="agent-desc-name leo">Leo</span>
+                <button type="button" class="agent-desc-role" data-agent="leo" aria-expanded="false" aria-label="COO — Drivers, fleet, compliance, dispatch">
+                  COO
+                  <span class="agent-desc-tooltip" role="tooltip">Drivers, fleet, compliance, dispatch</span>
+                </button>
+              </div>
+            </div>
+            <div class="agent-desc-divider" aria-hidden="true"></div>
+            <div class="agent-desc-item">
+              <div class="av av-mason">M</div>
+              <div class="agent-desc-content">
+                <span class="agent-desc-name mason">Mason</span>
+                <button type="button" class="agent-desc-role" data-agent="mason" aria-expanded="false" aria-label="Business Development — New segments, contracts, market opportunities">
+                  <span class="agent-desc-role-full">Business Development</span>
+                  <span class="agent-desc-role-short">BizDev</span>
+                  <span class="agent-desc-tooltip" role="tooltip">New segments, contracts, market opportunities</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="chat-page-body" id="chat-page-body">
+            <div class="drop-zone-overlay hidden" id="drop-zone-overlay">
+              <div class="drop-zone-label">
+                <i class="ti ti-upload" aria-hidden="true"></i>
+                Drop files to attach
+              </div>
+            </div>
+            <div class="messages" id="messages"></div>
+
+            <div class="input-area">
+              <div class="tag-hints">
+                <button type="button" class="tag-hint th-reid" data-tag="@Reid ">
+                  @Reid
+                </button>
+                <button type="button" class="tag-hint th-leo" data-tag="@Leo ">
+                  @Leo
+                </button>
+                <button type="button" class="tag-hint th-mason" data-tag="@Mason ">
+                  @Mason
+                </button>
+                <button type="button" class="tag-hint th-all" data-tag="@all ">
+                  @all
+                </button>
+              </div>
+              <div class="attachment-chips hidden" id="attachment-chips"></div>
+              <div class="input-box">
+                <textarea
+                  id="msg-input"
+                  rows="1"
+                  placeholder="Message Reid, Leo, and Mason… or tag with @Reid @Leo @Mason @all"
+                ></textarea>
+                <div class="input-actions">
+                  <input
+                    type="file"
+                    id="file-input"
+                    multiple
+                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt,.md,.csv,.xlsx,.xls,image/*,application/pdf,text/plain,text/csv"
+                    hidden
+                  />
+                  <button
+                    type="button"
+                    class="input-btn btn-attach"
+                    id="attach-btn"
+                    aria-label="Attach file"
+                    title="Attach file"
+                  >
+                    <i class="ti ti-paperclip" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="input-btn btn-mic"
+                    id="mic-btn"
+                    aria-label="Voice input"
+                    title="Voice input coming soon"
+                  >
+                    <i class="ti ti-microphone" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="input-btn btn-send"
+                    id="send-btn"
+                    aria-label="Send"
+                  >
+                    <i class="ti ti-send" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="input-hint">
+                Tag an agent to direct your message · @all broadcasts to all three
+                · No tag = auto-routed · Shift+Enter for new line
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-memory">
+          <div class="mem-page-header">
+            <div class="mem-page-title">Iron City Cargo Knowledge Base</div>
+            <div class="mem-page-sub">
+              Shared knowledge base — all agents read from the same facts
+            </div>
+            <div class="mem-page-actions">
+              <button type="button" class="mem-extract-btn" id="mem-extract-btn">
+                <i class="ti ti-sparkles" aria-hidden="true"></i>
+                Extract from current chat
+              </button>
+              <button type="button" class="mem-export-btn" id="mem-export-btn">
+                <i class="ti ti-download" aria-hidden="true"></i>
+                Export memory
+              </button>
+              <button type="button" class="mem-import-btn" id="mem-import-btn">
+                ↑ Import memory
+              </button>
+              <input
+                type="file"
+                id="mem-import-file"
+                accept=".json,application/json"
+                hidden
+              />
+              <div
+                id="mem-import-error"
+                class="mem-import-error hidden"
+                role="alert"
+              ></div>
+            </div>
+          </div>
+          <div class="mem-page-body" id="memory-body"></div>
+        </div>
+
+        <div class="page" id="page-documents">
+          <div class="doc-page-header">
+            <div class="doc-page-title" id="doc-page-title">Documents</div>
+            <div class="doc-page-sub" id="doc-page-sub">
+              Files uploaded here are available to Reid, Leo, and Mason as context in every conversation.
+            </div>
+          </div>
+          <div class="doc-page-body" id="documents-body"></div>
+        </div>
+      </main>
+
+      <div class="doc-preview-modal hidden" id="doc-preview-modal" role="dialog" aria-modal="true" aria-labelledby="doc-preview-title">
+        <div class="doc-preview-backdrop" id="doc-preview-backdrop"></div>
+        <div class="doc-preview-panel">
+          <div class="doc-preview-header">
+            <div class="doc-preview-title" id="doc-preview-title">Preview</div>
+            <button type="button" class="doc-preview-close" id="doc-preview-close" aria-label="Close preview">&times;</button>
+          </div>
+          <div class="doc-preview-body" id="doc-preview-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { REID, LEO, MASON } from "/src/agents.js";
+      import {
+        buildAgentUIMeta,
+        defaultAgentTooltipHint,
+      } from "/src/agent-themes.js";
+      import {
+        AVATAR_ICON_SIZES,
+        buildAgentAvatarHtml,
+        resolveAgentAvatarFields,
+      } from "/src/agent-avatar.js";
+      import {
+        positionAgentTooltip,
+        repositionVisibleAgentTooltips,
+      } from "/src/agent-tooltip-position.js";
+      import {
+        ALL_MODULES,
+        getActiveModule,
+        getActiveModuleId,
+        setActiveModule,
+        isBusinessModule,
+      } from "/src/modules/index.js";
+      import { createScopeUiState, scopeLoadingHtml } from "/src/scope-ui-state.js";
+      import {
+        addMemoryFact,
+        createChat,
+        deleteChat,
+        deleteMemoryFact,
+        detectAgent,
+        exportChat,
+        extractSharedMemoryFromChat,
+        getAgentResponse,
+        getAllAgentsResponse,
+        getChats,
+        getAgentMemory,
+        migrateOldData,
+        migrateDocumentMetadataV2,
+        isLegacyMigrationAllowed,
+        migrateLegacyDocumentsToSupabase,
+        migrateLegacyMemoryToSupabase,
+        setCloudStorageUser,
+        syncLocalChatsToCloud,
+        syncLocalMemoryToCloud,
+        getMemory,
+        getMessages,
+        getMessagesForContext,
+        isRateLimitedResponse,
+        saveMessage,
+        stripAgentNamePrefix,
+        updateChatTitle,
+      } from "/src/app.js";
+      import {
+        buildFlagFollowUpUserMessage,
+        detectAgentFlags,
+      } from "/src/agent-flags.js";
+      import {
+        MAX_ATTACHMENTS,
+        applyUspsFastTrack,
+        buildAttachmentMetadata,
+        buildUserApiContent,
+        formatFileSize,
+        getAutoPlaceholder,
+        getFileCategory,
+        isAcceptedFile,
+      } from "/src/attachments.js";
+      import {
+        buildLiveMarketContext,
+        isMarketBriefRequest,
+      } from "/src/market-context.js";
+      import { startBriefPoller } from "/src/brief-poller.js";
+      import { getSession, signOut } from "/src/auth.js";
+      import {
+        BUSINESSES,
+        getActiveBusiness,
+      } from "/src/businesses/index.js";
+      import { getVisibleAgentsForDocument } from "/documents/contextBuilder.js";
+      import {
+        deleteDocument,
+        getDocumentContent,
+        initDocumentDB,
+        listDocuments,
+        saveDocument,
+        syncLocalDocumentsToCloud,
+      } from "/documents/documentStore.js";
+      import { processFile } from "/documents/processors.js";
+      import {
+        DOC_ACCEPT_INPUT,
+        DOC_TAG_OPTIONS,
+        getActiveDocTagOptions,
+        formatDocumentDate,
+        estimatePdfPageCount,
+        getDocumentTypeIcon,
+        getScanTextForTags,
+        isImageDocumentFile,
+        spreadsheetPreviewText,
+        suggestTagsFromText,
+        validateDocumentFile,
+      } from "/documents/documents-ui.js";
+      import { generateWordDownload } from "/src/docx-export.js";
+      import DOMPurify from "dompurify";
+      import { marked } from "marked";
+
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+      });
+
+      marked.use({
+        hooks: {
+          postprocess(html) {
+            return html.replace(
+              /<table[\s\S]*?<\/table>/g,
+              (table) => `<div class="bubble-md-table-wrap">${table}</div>`
+            );
+          },
+        },
+      });
+
+      const SIDEBAR_COLLAPSED_KEY = "icc-sidebar-collapsed";
+      const CURRENT_CHAT_KEY_PREFIX = "icc-current-chat-id";
+
+      function buildAgentMetaEntry(key, agent, roleOverride) {
+        const { icon, iconFallback, initial } = resolveAgentAvatarFields(agent);
+        return {
+          name: agent.name,
+          role: roleOverride ?? agent.role,
+          description: agent.description ?? agent.role,
+          tooltipHint:
+            agent.tooltipHint ?? defaultAgentTooltipHint(agent.name),
+          icon,
+          iconFallback,
+          initial,
+          ...buildAgentUIMeta(key),
+        };
+      }
+
+      // Business agents meta (static — used as fallback and for existing business logic)
+      const BUSINESS_AGENT_META = {
+        reid: buildAgentMetaEntry("reid", REID, "CFO"),
+        leo: buildAgentMetaEntry("leo", LEO, "COO"),
+        mason: buildAgentMetaEntry("mason", MASON, "BizDev"),
+      };
+
+      function buildAgentMeta() {
+        const mod = getActiveModule();
+        if (!mod?.agentGroup) return BUSINESS_AGENT_META;
+
+        const meta = {};
+        for (const [key, agent] of Object.entries(mod.agentGroup)) {
+          meta[key] = buildAgentMetaEntry(key, agent);
+        }
+        return meta;
+      }
+
+      function renderAgentAvatar(
+        meta,
+        size,
+        extraClass = "",
+        rootClass = "av",
+        { showIcon = true } = {}
+      ) {
+        return buildAgentAvatarHtml({
+          icon: meta.icon,
+          iconFallback: meta.iconFallback,
+          initial: meta.initial,
+          avClass: meta.avClass,
+          size,
+          extraClass,
+          rootClass,
+          showIcon,
+        });
+      }
+
+      function buildAgentTooltipHtml(meta) {
+        const role = escapeHtml(meta.role);
+        const desc = meta.description
+          ? escapeHtml(meta.description)
+          : "";
+        const hint = escapeHtml(
+          meta.tooltipHint ?? defaultAgentTooltipHint(meta.name)
+        );
+        const avatar = renderAgentAvatar(
+          meta,
+          AVATAR_ICON_SIZES.tooltip,
+          "agent-tooltip-av"
+        );
+        return [
+          `<div class="agent-tooltip-head">${avatar}<span class="agent-tooltip-role">${role}</span></div>`,
+          desc ? `<span class="agent-tooltip-desc">${desc}</span>` : "",
+          `<span class="agent-tooltip-hint">${hint}</span>`,
+        ].join("");
+      }
+
+      function buildAgentTooltipLabel(meta) {
+        const parts = [meta.role];
+        if (meta.description) parts.push(meta.description);
+        if (meta.tooltipHint) parts.push(meta.tooltipHint);
+        return `${meta.name} — ${parts.join(". ")}`;
+      }
+
+      function bindAgentBarTooltips() {
+        const bar = document.querySelector(".agent-desc-bar");
+        if (!bar) return;
+
+        bar.querySelectorAll(".agent-desc-name-btn").forEach((btn) => {
+          const tip = btn.querySelector(".agent-desc-tooltip");
+          if (!tip || btn.dataset.tooltipBound === "1") return;
+          btn.dataset.tooltipBound = "1";
+
+          let hideTimer = null;
+
+          const hide = () => {
+            tip.classList.remove("is-visible", "is-above", "is-positioning");
+            tip.style.removeProperty("left");
+            tip.style.removeProperty("top");
+            tip.style.removeProperty("max-width");
+            tip.style.removeProperty("--tooltip-caret-x");
+            tip.style.removeProperty("visibility");
+          };
+
+          const show = () => {
+            if (hideTimer) {
+              clearTimeout(hideTimer);
+              hideTimer = null;
+            }
+            tip.classList.add("is-visible", "is-positioning");
+            tip.style.visibility = "hidden";
+            positionAgentTooltip(btn, tip);
+            tip.style.visibility = "";
+            tip.classList.remove("is-positioning");
+          };
+
+          const scheduleHide = () => {
+            hideTimer = setTimeout(hide, 80);
+          };
+
+          btn.addEventListener("mouseenter", show);
+          btn.addEventListener("focus", show);
+          btn.addEventListener("mouseleave", scheduleHide);
+          btn.addEventListener("blur", scheduleHide);
+          tip.addEventListener("mouseenter", () => {
+            if (hideTimer) clearTimeout(hideTimer);
+          });
+          tip.addEventListener("mouseleave", scheduleHide);
+        });
+
+        if (!bar.dataset.tooltipResizeBound) {
+          bar.dataset.tooltipResizeBound = "1";
+          const scheduleTooltipReposition = () => {
+            requestAnimationFrame(() => repositionVisibleAgentTooltips(bar));
+          };
+          window.addEventListener("resize", scheduleTooltipReposition);
+          bar.addEventListener("scroll", scheduleTooltipReposition, {
+            passive: true,
+          });
+          const sidebarEl = document.getElementById("sidebar");
+          sidebarEl?.addEventListener("transitionend", (event) => {
+            if (
+              event.propertyName === "width" ||
+              event.propertyName === "min-width" ||
+              event.propertyName === "transform"
+            ) {
+              scheduleTooltipReposition();
+            }
+          });
+          window.__repositionAgentTooltips = scheduleTooltipReposition;
+        }
+      }
+
+      let AGENT_META = buildAgentMeta();
+
+      const businessSelectEl = document.getElementById("business-select");
+      const businessSelectTriggerEl =
+        document.getElementById("business-select-trigger");
+      const businessSelectMenuEl =
+        document.getElementById("business-select-menu");
+      const businessSelectDisplayEl = document.getElementById(
+        "business-select-display"
+      );
+      const chatListEl = document.getElementById("chat-list");
+      const messagesEl = document.getElementById("messages");
+      const messageInput = document.getElementById("msg-input");
+      const sendBtn = document.getElementById("send-btn");
+      const micBtn = document.getElementById("mic-btn");
+      const topbarTitle = document.getElementById("topbar-title");
+      const topbarSub = document.getElementById("topbar-sub");
+      const memoryBodyEl = document.getElementById("memory-body");
+      const documentsBodyEl = document.getElementById("documents-body");
+      const settingsDropdown = document.getElementById("settings-dropdown");
+      const navMemoryBtn = document.getElementById("nav-memory");
+      const navDocumentsBtn = document.getElementById("nav-documents");
+      const pageChat = document.getElementById("page-chat");
+      const pageMemory = document.getElementById("page-memory");
+      const pageDocuments = document.getElementById("page-documents");
+      const docPageTitleEl = document.getElementById("doc-page-title");
+      const docPreviewModal = document.getElementById("doc-preview-modal");
+      const docPreviewTitleEl = document.getElementById("doc-preview-title");
+      const docPreviewBodyEl = document.getElementById("doc-preview-body");
+      const chatPageBody = document.getElementById("chat-page-body");
+      const dropZoneOverlay = document.getElementById("drop-zone-overlay");
+      const attachmentChipsEl = document.getElementById("attachment-chips");
+      const fileInput = document.getElementById("file-input");
+      const attachBtn = document.getElementById("attach-btn");
+      const newChatBtn = document.createElement("button");
+
+      let session = null;
+      let userId = null;
+      let userDisplayName = "You";
+      let userInitials = "TM";
+      let chats = [];
+      let currentChat = null;
+      let messages = [];
+      let ephemeralMessages = [];
+      let activeBusiness = getActiveBusiness();
+      let activeModule = getActiveModule();
+      let CURRENT_CHAT_KEY = `${CURRENT_CHAT_KEY_PREFIX}-${activeModule.id}`;
+      let CHAT_HISTORY_KEY = `chatHistory_${activeModule.id}`;
+      let MEMORY_KEY = `memoryFacts_${activeModule.id}`;
+      let agentPrompts = {};
+      const scopeUi = createScopeUiState();
+
+      function updateStorageKeys(moduleId) {
+        CURRENT_CHAT_KEY = `${CURRENT_CHAT_KEY_PREFIX}-${moduleId}`;
+        CHAT_HISTORY_KEY = `chatHistory_${moduleId}`;
+        MEMORY_KEY = `memoryFacts_${moduleId}`;
+      }
+
+      function activeModuleScopeId() {
+        return activeModule.id;
+      }
+
+      function documentsCacheKey(scopeId = activeModuleScopeId()) {
+        return `${scopeId}:${documentsBusinessFilter}`;
+      }
+
+      function renderPanelLoading(containerEl, message) {
+        if (containerEl) {
+          containerEl.innerHTML = scopeLoadingHtml(message);
+        }
+      }
+
+      function renderSidebarLoading() {
+        chatListEl.innerHTML = "";
+        chatListEl.appendChild(newChatBtn);
+        const loadingEl = document.createElement("div");
+        loadingEl.className = "scope-loading scope-loading--sidebar";
+        loadingEl.setAttribute("role", "status");
+        loadingEl.innerHTML =
+          '<div class="scope-loading-spinner" aria-hidden="true"></div><p>Loading chats…</p>';
+        chatListEl.appendChild(loadingEl);
+      }
+
+      function renderMessagesLoading() {
+        messagesEl.innerHTML = scopeLoadingHtml("Loading messages…");
+      }
+
+      function clearModuleScopedUi() {
+        chats = [];
+        currentChat = null;
+        messages = [];
+        ephemeralMessages = [];
+        isTypingVisible = false;
+        typingAgentKey = null;
+        pendingDeleteChatId = null;
+
+        scopeUi.loading.chats = true;
+        scopeUi.loading.messages = true;
+
+        renderSidebarLoading();
+        renderMessagesLoading();
+        topbarTitle.textContent = "Loading…";
+        topbarSub.textContent = "";
+
+        if (activePage === "memory") {
+          scopeUi.loading.memory = true;
+          renderPanelLoading(memoryBodyEl, "Loading knowledge base…");
+        }
+        if (activePage === "documents") {
+          scopeUi.loading.documents = true;
+          renderPanelLoading(documentsBodyEl, "Loading documents…");
+        }
+      }
+
+      function syncMessagesCacheForCurrentChat() {
+        if (!currentChat) return;
+        const key = scopeUi.messagesCacheKey(
+          activeModuleScopeId(),
+          currentChat.id
+        );
+        scopeUi.messagesCache.set(key, [...messages]);
+      }
+
+      function invalidateDocumentsCacheForScope(scopeId = activeModuleScopeId()) {
+        for (const key of [...scopeUi.docsCache.keys()]) {
+          if (key.startsWith(`${scopeId}:`)) {
+            scopeUi.docsCache.delete(key);
+          }
+        }
+      }
+
+      function applyCachedChatsForScope(scopeId) {
+        const cached = scopeUi.chatsCache.get(scopeId);
+        if (!cached?.length) return false;
+
+        chats = [...cached];
+        scopeUi.loading.chats = false;
+        renderSidebar();
+
+        const savedChatId = sessionStorage.getItem(
+          `${CURRENT_CHAT_KEY_PREFIX}-${scopeId}`
+        );
+        const preferred =
+          (savedChatId && chats.find((c) => c.id === savedChatId)) || chats[0];
+        if (!preferred) return true;
+
+        currentChat = preferred;
+        const msgKey = scopeUi.messagesCacheKey(scopeId, preferred.id);
+        const cachedMsgs = scopeUi.messagesCache.get(msgKey);
+        if (cachedMsgs) {
+          messages = [...cachedMsgs];
+          scopeUi.loading.messages = false;
+          renderMessages({ scrollBehavior: "none" });
+          updateTopbar();
+        } else {
+          scopeUi.loading.messages = true;
+          renderMessagesLoading();
+          topbarTitle.textContent = preferred.title || "Untitled chat";
+          topbarSub.textContent = "";
+        }
+
+        return true;
+      }
+
+      function buildChatModuleMeta() {
+        return {
+          moduleId: activeModule.id,
+          moduleType: activeModule.moduleType,
+          moduleName: activeModule.displayName,
+          ...(isBusinessModule(activeModule.id)
+            ? { businessId: activeBusiness.id }
+            : {}),
+        };
+      }
+
+      function logChatPersist(label, payload) {
+        if (!import.meta.env?.DEV) return;
+        console.log(`[chat-persist] ${label}`, payload);
+      }
+      let isWaiting = false;
+      let isTypingVisible = false;
+      let typingAgentKey = null;
+      let activePage = "chat";
+      let pendingDocUpload = null;
+      let documentsBusinessFilter = "all";
+      let pendingDeleteChatId = null;
+      let pendingAttachments = [];
+      let dragDepth = 0;
+      const imagePreviewUrls = new Map();
+
+      function isMissingTableError(err) {
+        return (
+          err?.code === "PGRST205" ||
+          err?.message?.includes("Could not find the table")
+        );
+      }
+
+      function renderDatabaseSetupHelp() {
+        return `
+          <div class="empty-state setup-error">
+            <h2>Database setup required</h2>
+            <p>Your Supabase project is connected, but the <code>chats</code> and <code>memory</code> tables don't exist yet.</p>
+            <ol class="setup-steps">
+              <li>Open the Supabase SQL Editor for this project</li>
+              <li>Copy and run the full <strong>supabase-setup.sql</strong> file from this repo</li>
+              <li>Refresh this page</li>
+            </ol>
+            <p>
+              <a class="setup-link" href="https://supabase.com/dashboard/project/mwjucnneqglhbwrxibod/sql/new" target="_blank" rel="noopener">
+                Open SQL Editor →
+              </a>
+            </p>
+          </div>
+        `;
+      }
+
+      function renderLoadError(title, err) {
+        if (isMissingTableError(err)) {
+          return renderDatabaseSetupHelp();
+        }
+        return `
+          <div class="empty-state">
+            <h2>${escapeHtml(title)}</h2>
+            <p>${escapeHtml(err?.message ?? "Please try again.")}</p>
+          </div>
+        `;
+      }
+
+      newChatBtn.type = "button";
+      newChatBtn.className = "new-chat-btn";
+      newChatBtn.innerHTML =
+        '<i class="ti ti-plus" aria-hidden="true"></i> New chat';
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      /** Prevent GFM 4-space indent from turning normal prose into <pre><code> blocks. */
+      function normalizeAgentMarkdownInput(text) {
+        return String(text ?? "").replace(/^( {4,})(?=\S)/gm, (_, spaces) =>
+          spaces.length >= 4 ? "" : spaces
+        );
+      }
+
+      function renderAgentMarkdown(text) {
+        const source = String(text ?? "");
+        const normalized = normalizeAgentMarkdownInput(source);
+        const rawHtml = marked.parse(normalized, {
+          async: false,
+          gfm: true,
+          breaks: true,
+        });
+        const html = DOMPurify.sanitize(rawHtml);
+
+        if (import.meta.env?.DEV) {
+          const hasPre = /<pre[\s>]/i.test(html);
+          console.log("[message-render]", {
+            inputChars: source.length,
+            hadFourSpaceIndent: /^ {4}\S/m.test(source),
+            markdownHasPreBlock: hasPre,
+            htmlPreview: html.slice(0, 500),
+          });
+        }
+
+        return html;
+      }
+
+      function downloadAsHtml(message, filterAgentName) {
+        let sourceBubble = null;
+        let sourceAgentKey = message?.agent;
+
+        if (message?.id && !isExportStatusMessage(message.content)) {
+          const group = messagesEl.querySelector(
+            `.msg-group.agent[data-message-id="${CSS.escape(message.id)}"]`
+          );
+          sourceBubble = group?.querySelector(
+            ".bubble-reid, .bubble-leo, .bubble-mason, .bubble"
+          );
+        }
+
+        if (!sourceBubble) {
+          sourceBubble = getLastExportableAgentBubble(
+            filterAgentName || sourceAgentKey
+          );
+          if (sourceBubble) {
+            const parentMsg = sourceBubble.closest("[data-agent]");
+            sourceAgentKey = parentMsg?.dataset.agent || sourceAgentKey;
+          }
+        }
+
+        const bubbleMd = sourceBubble?.querySelector(".bubble-md");
+        if (!bubbleMd) {
+          throw new Error("Could not find message content to export.");
+        }
+
+        const agentName =
+          AGENT_META[sourceAgentKey]?.name || sourceAgentKey || "Agent";
+        const agentRole = AGENT_META[sourceAgentKey]?.role || "";
+        const chatTitle = currentChat?.title || "Untitled";
+        const content = bubbleMd.innerHTML;
+        const safeAgentName = escapeHtml(agentName);
+        const safeAgentRole = escapeHtml(agentRole);
+        const safeChatTitle = escapeHtml(chatTitle);
+        const exportDate = new Date().toLocaleDateString();
+
+        const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${safeChatTitle}</title>
+<style>
+  body {
+    font-family: -apple-system, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #111;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 40px;
+  }
+  .header {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  .header h1 { margin: 0 0 4px; font-size: 20px; }
+  .header p { margin: 0; color: #666; font-size: 12px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+  }
+  th, td {
+    border: 0.5px solid #ccc;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  th { background: #f5f5f5; font-weight: 600; }
+  tr:nth-child(even) { background: #fafafa; }
+  h1,h2,h3 { margin: 20px 0 8px; }
+  .footer {
+    border-top: 1px solid #ccc;
+    margin-top: 40px;
+    padding-top: 12px;
+    font-size: 11px;
+    color: #999;
+  }
+  @media print {
+    body { margin: 0; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>${safeAgentName} — ${safeAgentRole}</h1>
+  <p>Iron City Cargo · ${safeChatTitle} · ${escapeHtml(exportDate)}</p>
+</div>
+${content}
+<div class="footer">
+  Iron City Cargo — Confidential
+</div>
+</body>
+</html>`;
+
+        const filename =
+          `${agentName}-${slugifyFilename(chatTitle)}-${Date.now()}.html`
+            .toLowerCase()
+            .replace(/\s+/g, "-");
+
+        const blob = new Blob([html], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+      function slugifyFilename(text, maxLen = 40) {
+        return (
+          (text || "export")
+            .replace(/[^\w\s-]/g, "")
+            .trim()
+            .replace(/\s+/g, "-")
+            .slice(0, maxLen)
+            .replace(/^-+|-+$/g, "") || "export"
+        );
+      }
+
+      function formatFileDate(dateStr) {
+        return new Date(dateStr).toISOString().slice(0, 10);
+      }
+
+      const FILE_EXPORT_AGENT_MESSAGES = {
+        csv: {
+          success: "Downloaded. Open it in Excel or Google Sheets.",
+          failure:
+            "Couldn't find a table to export. Ask me to build the data as a markdown table first, then try again.",
+        },
+        pdf: {
+          success:
+            "HTML file downloaded — open it in your browser and press Ctrl+P (or Cmd+P on Mac) to save as PDF.",
+          failure:
+            "Couldn't export that message. Try again after the agent finishes responding.",
+        },
+        excel: {
+          success: "Excel file downloaded.",
+          failure:
+            "Excel generation failed. Try again or ask me to give you the data as a CSV instead.",
+        },
+        word: {
+          success: "Word doc downloaded.",
+          failure: "Word doc generation failed. Try again.",
+        },
+      };
+
+      async function sendAgentConfirmation(agentKey, content) {
+        if (!currentChat?.id) return null;
+
+        const saved = await saveMessage(
+          currentChat.id,
+          userId,
+          "assistant",
+          content,
+          agentKey,
+          null,
+          activeModuleScopeId()
+        );
+        messages.push(saved);
+        syncMessagesCacheForCurrentChat();
+        renderMessages({
+          scrollBehavior: "agent-start",
+          scrollToAgentKey: agentKey,
+        });
+        return saved;
+      }
+
+      function detectExportKeyword(text) {
+        const trimmed = (text ?? "").trim();
+        if (!trimmed) return null;
+
+        const cleaned = trimmed
+          .replace(/^@(reid|leo|mason|all)\s*/i, "")
+          .toLowerCase();
+
+        if (
+          /pdf|as a pdf|create.*pdf|make.*pdf|save.*pdf|export.*pdf|download.*pdf/i.test(
+            cleaned
+          )
+        ) {
+          return "pdf";
+        }
+
+        if (
+          /word\s*doc|as a doc|create.*word|make.*word|generate.*word|export.*word|download.*word|as a document|word\s*document/i.test(
+            cleaned
+          )
+        ) {
+          return "word";
+        }
+
+        if (
+          /excel|as.*excel|create.*excel|make.*excel|generate.*excel|as a spreadsheet|make.*spreadsheet/i.test(
+            cleaned
+          )
+        ) {
+          return "excel";
+        }
+
+        if (/csv|as.*csv|download.*csv|export.*csv|give.*csv/i.test(cleaned)) {
+          return "csv";
+        }
+
+        return null;
+      }
+
+      const EXPORT_TARGET_IGNORE_PHRASES = [
+        "html file downloaded",
+        "word doc generation failed",
+        "pdf generation failed",
+        "word doc downloaded",
+        "excel file downloaded",
+        "csv downloaded",
+        "file downloaded",
+        "try again",
+        "downloaded",
+        "open it in your browser",
+        "save as pdf",
+        "print dialog",
+        "couldn't find a table",
+        "couldn't export",
+        "file generation failed",
+        "excel generation failed",
+        "done",
+        "use the export command",
+      ];
+
+      const EXPORT_CONFIRMATIONS = [
+        "PDF downloaded",
+        "HTML file downloaded",
+        "Word doc downloaded",
+        "Excel file downloaded",
+        "CSV downloaded",
+        "File downloaded",
+        "Print dialog",
+        "Word doc generation failed",
+        "File generation failed",
+        "Couldn't find a table",
+        "Downloaded. Open it in Excel",
+        "Excel generation failed",
+        "Couldn't export that message",
+      ];
+
+      function isExportStatusMessage(content) {
+        const text = (content ?? "").trim().toLowerCase();
+        if (!text) return true;
+        if (text.length < 300) {
+          return EXPORT_TARGET_IGNORE_PHRASES.some((phrase) =>
+            text.includes(phrase)
+          );
+        }
+        return (
+          isExportConfirmationMessage(content) ||
+          EXPORT_TARGET_IGNORE_PHRASES.some((phrase) => text.includes(phrase))
+        );
+      }
+
+      function isExportConfirmationMessage(content) {
+        const text = (content ?? "").trim();
+        if (!text) return false;
+        return EXPORT_CONFIRMATIONS.some((phrase) => text.includes(phrase));
+      }
+
+      function getExportableCandidates(messageList, taggedAgent) {
+        return messageList
+          .filter((m) => m.role === "assistant" && m.agent)
+          .filter((m) => {
+            const text = stripAgentNamePrefix(m.content || "").trim();
+            return text.length > 300;
+          })
+          .filter((m) => !isExportStatusMessage(m.content))
+          .filter((m) => !taggedAgent || m.agent === taggedAgent);
+      }
+
+      function extractDocumentReferences(userRequest) {
+        const cleaned = (userRequest ?? "")
+          .replace(/^@(reid|leo|mason|all)\s*/i, "")
+          .toLowerCase();
+        const refs = new Set();
+
+        const codeMatches = cleaned.match(/\b(?=[a-z]*\d)[a-z0-9]{3,}\b/gi) || [];
+        for (const match of codeMatches) {
+          refs.add(match.toLowerCase());
+        }
+
+        return [...refs];
+      }
+
+      function resolveExportTarget(userRequest, messageList, taggedAgent = null) {
+        const query = (userRequest ?? "").toLowerCase();
+        const candidates = getExportableCandidates(messageList, taggedAgent);
+
+        if (!candidates.length) return null;
+
+        const docRefs = extractDocumentReferences(userRequest);
+
+        const scored = candidates
+          .map((message) => {
+            let score = 0;
+            const content = stripAgentNamePrefix(message.content).toLowerCase();
+
+            for (const ref of docRefs) {
+              if (content.includes(ref)) score += 10;
+            }
+
+            if (query.includes("324a1") && content.includes("324a1")) score += 10;
+            if (query.includes("brief") && content.includes("brief")) score += 5;
+            if (query.includes("analysis") && content.includes("analysis")) {
+              score += 4;
+            }
+
+            if (message.agent && query.includes(message.agent.toLowerCase())) {
+              score += 3;
+            }
+            if (taggedAgent && message.agent === taggedAgent) score += 3;
+
+            const recencyRank = candidates.length - 1 - candidates.indexOf(message);
+            if (
+              recencyRank === 0 &&
+              /\b(that|this|above|the brief|the analysis)\b/.test(query)
+            ) {
+              score += 2;
+            }
+
+            return { message, score };
+          })
+          .sort((a, b) => b.score - a.score);
+
+        if (!scored.length || scored[0].score === 0) {
+          return null;
+        }
+
+        const topScore = scored[0].score;
+        const tied = scored.filter((entry) => entry.score === topScore);
+        if (tied.length > 1) {
+          return {
+            ambiguous: true,
+            candidates: tied.map((entry) => entry.message),
+          };
+        }
+
+        return scored[0].message;
+      }
+
+      function getExportTargetPreview(message) {
+        const text = stripAgentNamePrefix(message.content || "")
+          .replace(/\s+/g, " ")
+          .trim();
+        const agentName = AGENT_META[message.agent]?.name || message.agent;
+        const preview = text.length > 80 ? `${text.slice(0, 80)}…` : text;
+        return `${agentName}: ${preview}`;
+      }
+
+      function showExportTargetPicker(candidateMessages, exportType, userRequestText) {
+        return new Promise((resolve) => {
+          document.getElementById("export-target-picker")?.remove();
+
+          const overlay = document.createElement("div");
+          overlay.id = "export-target-picker";
+          overlay.className = "export-target-picker";
+          overlay.innerHTML = `
+            <div class="export-target-picker-card" role="dialog" aria-modal="true" aria-labelledby="export-target-picker-title">
+              <h3 id="export-target-picker-title">Which message should be exported?</h3>
+              <p class="export-target-picker-sub">Multiple possible matches found. Choose the document to export.</p>
+              <div class="export-target-picker-list"></div>
+              <button type="button" class="export-target-picker-cancel">Cancel</button>
+            </div>
+          `;
+
+          const list = overlay.querySelector(".export-target-picker-list");
+          candidateMessages.forEach((msg) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "export-target-picker-option";
+            button.textContent = getExportTargetPreview(msg);
+            button.addEventListener("click", () => {
+              overlay.remove();
+              resolve(msg);
+            });
+            list.appendChild(button);
+          });
+
+          overlay
+            .querySelector(".export-target-picker-cancel")
+            .addEventListener("click", () => {
+              overlay.remove();
+              resolve(null);
+            });
+
+          overlay.addEventListener("click", (event) => {
+            if (event.target === overlay) {
+              overlay.remove();
+              resolve(null);
+            }
+          });
+
+          document.body.appendChild(overlay);
+        });
+      }
+
+      async function askUserToSelectExportTarget(exportType, userRequestText) {
+        const taggedAgent = getTaggedAgentFromText(userRequestText);
+        const candidates = getExportableCandidates(
+          messages.slice(0, -1),
+          taggedAgent
+        );
+        const exportAgentName = resolveExportAgentName(
+          userRequestText,
+          null,
+          exportType
+        );
+
+        if (!candidates.length) {
+          await sendAgentConfirmation(
+            exportAgentName,
+            "Couldn't find a message to export. Ask an agent to create the content first, then try again with the document name — e.g. \"create a pdf of the 324A1 brief\"."
+          );
+          return;
+        }
+
+        if (candidates.length === 1) {
+          await triggerAutoFileExport(exportType, [candidates[0]], userRequestText);
+          return;
+        }
+
+        const selected = await showExportTargetPicker(
+          candidates,
+          exportType,
+          userRequestText
+        );
+        if (selected) {
+          await triggerAutoFileExport(exportType, [selected], userRequestText);
+        } else {
+          await sendAgentConfirmation(
+            exportAgentName,
+            "Export cancelled — specify which document to export, e.g. \"create a pdf of the 324A1 brief\"."
+          );
+        }
+      }
+
+      async function resolveAndTriggerExport(exportType, userRequestText) {
+        const taggedAgent = getTaggedAgentFromText(userRequestText);
+        const history = messages.slice(0, -1);
+        const target = resolveExportTarget(userRequestText, history, taggedAgent);
+        const exportAgentName = resolveExportAgentName(
+          userRequestText,
+          null,
+          exportType
+        );
+
+        if (!target) {
+          await askUserToSelectExportTarget(exportType, userRequestText);
+          return;
+        }
+
+        if (target.ambiguous) {
+          const selected = await showExportTargetPicker(
+            target.candidates,
+            exportType,
+            userRequestText
+          );
+          if (selected) {
+            await triggerAutoFileExport(exportType, [selected], userRequestText);
+          } else {
+            await sendAgentConfirmation(
+              exportAgentName,
+              "Export cancelled — specify which document to export."
+            );
+          }
+          return;
+        }
+
+        await triggerAutoFileExport(exportType, [target], userRequestText);
+      }
+
+      function getTaggedAgentFromText(text) {
+        const match = (text ?? "").match(/@(reid|leo|mason)\b/i);
+        return match ? match[1].toLowerCase() : null;
+      }
+
+      function resolveExportAgentName(messageText, sourceMessage, exportType) {
+        const taggedAgent = getTaggedAgentFromText(messageText);
+        if (taggedAgent) return taggedAgent;
+        if (sourceMessage?.agent) return sourceMessage.agent;
+        if (exportType === "word") return "mason";
+        if (exportType === "excel" || exportType === "csv") return "reid";
+        return "mason";
+      }
+
+      function getLastExportableAgentMessage(messageList, agentName) {
+        for (let i = messageList.length - 1; i >= 0; i -= 1) {
+          const entry = messageList[i];
+          if (entry.role !== "assistant" || !entry.agent) continue;
+          if (isExportStatusMessage(entry.content)) continue;
+          if (agentName && entry.agent !== agentName) continue;
+          return entry;
+        }
+        return null;
+      }
+
+      function getLastExportableAgentBubble(agentName) {
+        const bubbles = Array.from(
+          messagesEl.querySelectorAll(".bubble-reid, .bubble-leo, .bubble-mason")
+        ).reverse();
+
+        for (const bubble of bubbles) {
+          const text = (bubble.textContent || "").toLowerCase();
+          if (
+            EXPORT_TARGET_IGNORE_PHRASES.some((phrase) => text.includes(phrase)) ||
+            EXPORT_CONFIRMATIONS.some((phrase) => text.includes(phrase))
+          ) {
+            continue;
+          }
+
+          if (agentName) {
+            const parentMsg = bubble.closest("[data-agent]");
+            if (parentMsg && parentMsg.dataset.agent !== agentName) {
+              continue;
+            }
+          }
+
+          return bubble;
+        }
+
+        return null;
+      }
+
+      function downloadBlob(filename, blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function currentChatStorageKey() {
+        return CURRENT_CHAT_KEY;
+      }
+
+      async function refreshAgentPrompts() {
+        activeModule = getActiveModule();
+        window.__activeModule = activeModule;
+        activeBusiness = isBusinessModule(activeModule.id)
+          ? getActiveBusiness()
+          : activeBusiness;
+        AGENT_META = buildAgentMeta();
+
+        const modId = activeModule.id;
+        const memoryInput = userId
+          ? await getAgentMemory(
+              userId,
+              activeModule.moduleType === "business"
+                ? activeBusiness
+                : { id: modId }
+            )
+          : activeModule.isPortfolio
+            ? { portfolio: true, sections: [] }
+            : { portfolio: false, facts: [] };
+
+        const emptyDocContext = { textBlocks: "", mediaBlocks: [] };
+        const agentMap =
+          activeModule.agentGroup ?? { reid: REID, leo: LEO, mason: MASON };
+
+        agentPrompts = {};
+        for (const [key, agent] of Object.entries(agentMap)) {
+          agentPrompts[key] = {
+            system: await agent.buildContext(
+              memoryInput,
+              activeModule,
+              emptyDocContext
+            ),
+            short: await agent.shortBuildContext(
+              memoryInput,
+              activeModule,
+              emptyDocContext
+            ),
+          };
+        }
+
+        renderAgentDescBar();
+        renderTagHints();
+        renderInputHint();
+      }
+
+      function closeBusinessDropdown() {
+        businessSelectMenuEl.classList.add("hidden");
+        businessSelectTriggerEl.setAttribute("aria-expanded", "false");
+      }
+
+      function openBusinessDropdown() {
+        businessSelectMenuEl.classList.remove("hidden");
+        businessSelectTriggerEl.setAttribute("aria-expanded", "true");
+      }
+
+      const MODULE_ICON_CLASSES = {
+        council: "ti-users-group",
+        stocks: "ti-chart-candlestick",
+        paris: "ti-briefcase",
+        "iron-city-cargo": "ti-truck",
+        taniva: "ti-heart-rate-monitor",
+        "hawthorne-legacy": "ti-shield-check",
+      };
+
+      /** Tabler @2.44 webfont name for stocks (no chart-candlestick glyph). */
+      const MODULE_ICON_TABLER_ALIASES = {
+        "ti-chart-candlestick": "ti-chart-candle",
+      };
+
+      function resolveModuleIconKey(moduleId, mod) {
+        return String(moduleId ?? mod?.id ?? "").trim();
+      }
+
+      function getModuleNavIconClass(moduleId, mod) {
+        const key = resolveModuleIconKey(moduleId, mod);
+        let slug = MODULE_ICON_CLASSES[key];
+        if (slug && MODULE_ICON_TABLER_ALIASES[slug]) {
+          slug = MODULE_ICON_TABLER_ALIASES[slug];
+        }
+        return slug ? `ti ${slug}` : "ti ti-circle";
+      }
+
+      /** Icon + label for module navigation (Tabler only). */
+      function buildModuleDisplay(moduleId, mod) {
+        const icon = document.createElement("span");
+        icon.className = "business-dropdown-module-icon";
+        icon.setAttribute("aria-hidden", "true");
+
+        const iconEl = document.createElement("i");
+        iconEl.className = getModuleNavIconClass(moduleId, mod);
+        iconEl.setAttribute("aria-hidden", "true");
+        icon.appendChild(iconEl);
+
+        const label = document.createElement("span");
+        label.className = "business-dropdown-module-label";
+        if (mod.isPortfolio) {
+          label.classList.add("business-dropdown-module-label--portfolio");
+        }
+        label.textContent = mod.shortName ?? mod.displayName;
+
+        const wrap = document.createDocumentFragment();
+        wrap.append(icon, label);
+        return wrap;
+      }
+
+      function mountModuleDisplay(el, moduleId, mod) {
+        el.replaceChildren(buildModuleDisplay(moduleId, mod));
+      }
+
+      function syncBusinessDropdownUI() {
+        const id = activeModule.id;
+        const mod = ALL_MODULES[id] ?? activeModule;
+        businessSelectEl.value = id;
+
+        businessSelectDisplayEl.classList.add("business-dropdown-value--module");
+        mountModuleDisplay(businessSelectDisplayEl, id, mod);
+
+        businessSelectTriggerEl.classList.toggle(
+          "business-dropdown-trigger--portfolio",
+          Boolean(mod.isPortfolio)
+        );
+
+        businessSelectMenuEl
+          .querySelectorAll(".business-dropdown-option")
+          .forEach((btn) => {
+            const selected = btn.dataset.value === id;
+            btn.classList.toggle("is-selected", selected);
+            btn.setAttribute("aria-selected", selected ? "true" : "false");
+          });
+      }
+
+      function renderBusinessSelect() {
+        businessSelectEl.innerHTML = "";
+        businessSelectMenuEl.innerHTML = "";
+
+        // Non-business top-level modules (Council, Stocks) at the top
+        const nonBizModules = Object.entries(ALL_MODULES).filter(
+          ([, mod]) => mod.moduleType !== "business"
+        );
+        if (nonBizModules.length) {
+          for (const [id, mod] of nonBizModules) {
+            appendModuleDropdownOption(id, mod, false);
+          }
+          const divider = document.createElement("div");
+          divider.className = "business-dropdown-divider";
+          divider.setAttribute("role", "separator");
+          businessSelectMenuEl.appendChild(divider);
+        }
+
+        // Business section label
+        const bizLabel = document.createElement("div");
+        bizLabel.className = "business-dropdown-section-label";
+        bizLabel.textContent = "Business";
+        businessSelectMenuEl.appendChild(bizLabel);
+
+        // Portfolio first
+        appendModuleDropdownOption("paris", ALL_MODULES.paris, true);
+
+        const divider2 = document.createElement("div");
+        divider2.className = "business-dropdown-divider";
+        divider2.setAttribute("role", "separator");
+        businessSelectMenuEl.appendChild(divider2);
+
+        // Individual businesses
+        for (const [id, mod] of Object.entries(ALL_MODULES)) {
+          if (mod.moduleType !== "business" || mod.isPortfolio) continue;
+          appendModuleDropdownOption(id, mod, false);
+        }
+
+        syncBusinessDropdownUI();
+      }
+
+      function appendModuleDropdownOption(id, mod, isPortfolio) {
+        const option = document.createElement("option");
+        option.value = id;
+        businessSelectEl.appendChild(option);
+
+        const item = document.createElement("button");
+        item.type = "button";
+        item.role = "option";
+        item.className = isPortfolio
+          ? "business-dropdown-option business-dropdown-option--portfolio"
+          : "business-dropdown-option";
+        item.dataset.value = id;
+        item.classList.add("business-dropdown-option--module");
+        if (isPortfolio) {
+          item.classList.add("business-dropdown-option--portfolio");
+        }
+        item.append(buildModuleDisplay(id, mod));
+
+        businessSelectMenuEl.appendChild(item);
+      }
+
+      function initBusinessDropdown() {
+        businessSelectTriggerEl.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const isOpen =
+            businessSelectTriggerEl.getAttribute("aria-expanded") === "true";
+          if (isOpen) {
+            closeBusinessDropdown();
+          } else {
+            openBusinessDropdown();
+          }
+        });
+
+        businessSelectMenuEl.addEventListener("click", (event) => {
+          const item = event.target.closest(".business-dropdown-option");
+          if (!item?.dataset.value) return;
+          closeBusinessDropdown();
+          if (item.dataset.value !== activeModule.id) {
+            businessSelectEl.value = item.dataset.value;
+            switchModule(item.dataset.value);
+          }
+        });
+
+        document.addEventListener("click", () => closeBusinessDropdown());
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") closeBusinessDropdown();
+        });
+      }
+
+      function updateBusinessChrome() {
+        const sbBrand = document.getElementById("business-select-label");
+        if (sbBrand) {
+          if (activeModule.moduleType !== "business") {
+            sbBrand.textContent = activeModule.displayName;
+          } else if (activeBusiness.isPortfolio) {
+            sbBrand.textContent = "Portfolio View";
+          } else {
+            sbBrand.textContent = "Business";
+          }
+        }
+
+        syncBusinessDropdownUI();
+
+        navDocumentsBtn.classList.remove("hidden");
+        navMemoryBtn.classList.remove("hidden");
+      }
+
+      function updateDocumentTitle() {
+        document.title = "Taylor's Command Center";
+      }
+
+      function updateMemoryPageHeader() {
+        const memTitle = document.querySelector(".mem-page-title");
+        if (memTitle) {
+          memTitle.textContent = `${activeModule.displayName} Knowledge Base`;
+        }
+      }
+
+      async function loadModuleChatsForScope(scopeId, moduleRequestId) {
+        scopeUi.loading.chats = true;
+        if (!chats.length) {
+          renderSidebarLoading();
+        }
+
+        logChatPersist("hydrate", {
+          module: { id: scopeId },
+          storageKey: `chatHistory_${scopeId}`,
+        });
+
+        try {
+          const fetched = await getChats(userId, scopeId);
+          if (
+            !scopeUi.isModuleLoadCurrent(moduleRequestId) ||
+            scopeId !== activeModuleScopeId()
+          ) {
+            return;
+          }
+
+          chats = fetched;
+          scopeUi.chatsCache.set(scopeId, fetched);
+          logChatPersist("loaded chats", {
+            count: chats.length,
+            ids: chats.map((c) => c.id),
+          });
+          renderSidebar();
+          scopeUi.loading.chats = false;
+
+          ephemeralMessages = [];
+          isTypingVisible = false;
+          typingAgentKey = null;
+
+          const savedChatId = sessionStorage.getItem(
+            `${CURRENT_CHAT_KEY_PREFIX}-${scopeId}`
+          );
+          const restoredChat = savedChatId
+            ? chats.find((chat) => chat.id === savedChatId)
+            : null;
+
+          if (restoredChat) {
+            await loadChat(restoredChat.id, { moduleRequestId });
+          } else if (chats.length > 0) {
+            await loadChat(chats[0].id, { moduleRequestId });
+          } else {
+            await startNewChat({ moduleRequestId });
+          }
+        } catch (err) {
+          if (!scopeUi.isModuleLoadCurrent(moduleRequestId)) return;
+          console.error("Failed to load chats:", err);
+          chatListEl.innerHTML = "";
+          chatListEl.appendChild(newChatBtn);
+          const errEl = document.createElement("div");
+          errEl.className = "scope-loading scope-loading--sidebar";
+          errEl.textContent = "Could not load chats.";
+          chatListEl.appendChild(errEl);
+        } finally {
+          if (scopeUi.isModuleLoadCurrent(moduleRequestId)) {
+            scopeUi.loading.chats = false;
+          }
+        }
+      }
+
+      async function loadBusinessChats() {
+        const requestId = scopeUi.moduleLoadId;
+        await loadModuleChatsForScope(activeModuleScopeId(), requestId);
+      }
+
+      function clearChatView() {
+        currentChat = null;
+        messages = [];
+        ephemeralMessages = [];
+        isTypingVisible = false;
+        typingAgentKey = null;
+        scopeUi.loading.messages = false;
+        messagesEl.innerHTML = "";
+      }
+
+      async function switchModule(moduleId) {
+        if (!moduleId || moduleId === activeModule.id) return;
+        if (isWaiting) {
+          syncBusinessDropdownUI();
+          return;
+        }
+
+        const moduleRequestId = scopeUi.bumpModuleLoad();
+        const targetScopeId = moduleId;
+
+        clearModuleScopedUi();
+        scopeUi.loading.module = true;
+
+        setActiveModule(moduleId);
+        activeModule = getActiveModule();
+
+        if (isBusinessModule(moduleId)) {
+          activeBusiness = getActiveBusiness();
+        }
+
+        updateStorageKeys(activeModule.id);
+        applyCachedChatsForScope(targetScopeId);
+
+        await refreshAgentPrompts();
+        if (
+          !scopeUi.isModuleLoadCurrent(moduleRequestId) ||
+          targetScopeId !== getActiveModuleId()
+        ) {
+          return;
+        }
+
+        renderBusinessSelect();
+        updateBusinessChrome();
+        updateDocumentTitle();
+        updateMemoryPageHeader();
+        updateDocumentsPageHeader();
+
+        if (!activeBusiness.isPortfolio) {
+          documentsBusinessFilter = "all";
+        }
+
+        await loadModuleChatsForScope(targetScopeId, moduleRequestId);
+        if (!scopeUi.isModuleLoadCurrent(moduleRequestId)) return;
+
+        scopeUi.loading.module = false;
+        updateSendButtonState();
+        messageInput.focus();
+
+        if (activeModule.moduleType !== "business") {
+          showToast(`Switched to ${activeModule.displayName}`, 3000);
+        } else if (moduleId === "paris") {
+          showToast(
+            "Portfolio view active — Reid, Leo, and Mason can see all businesses",
+            4000
+          );
+        } else {
+          showToast(`Switched to ${activeModule.displayName}`, 3000);
+        }
+
+        if (activePage === "memory") {
+          try {
+            await loadMemoryForScope(moduleRequestId);
+          } catch (err) {
+            console.error(err);
+          }
+        }
+        if (activePage === "documents") {
+          try {
+            await loadDocumentsForScope(moduleRequestId);
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      }
+
+      async function switchBusiness(businessId) {
+        return switchModule(businessId);
+      }
+
+      function showToast(message, durationMs = 4000) {
+        let toast = document.getElementById("export-toast");
+        if (!toast) {
+          toast = document.createElement("div");
+          toast.id = "export-toast";
+          toast.className = "export-toast";
+          document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.add("visible");
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => {
+          toast.classList.remove("visible");
+        }, durationMs);
+      }
+
+      function cleanCsvCellValue(text) {
+        return text
+          .replace(/\u2014/g, "-")
+          .replace(/\u2212/g, "-")
+          .replace(/\u2013/g, "-")
+          .replace(/[\u201C\u201D]/g, '"')
+          .replace(/[\u2018\u2019]/g, "'")
+          .replace(/[^\x00-\x7F]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function tableToCsv(table) {
+        const rows = [];
+        table.querySelectorAll("tr").forEach((row) => {
+          const cells = [...row.querySelectorAll("th, td")].map((cell) => {
+            let text = cleanCsvCellValue(cell.textContent);
+            if (/[",\n]/.test(text)) {
+              text = `"${text.replace(/"/g, '""')}"`;
+            }
+            return text;
+          });
+          rows.push(cells.join(","));
+        });
+        return rows.join("\n");
+      }
+
+      function tableCsvSlug(table, index) {
+        const header = table.querySelector("th")?.textContent.trim();
+        return slugifyFilename(header || `table-${index + 1}`);
+      }
+
+      function downloadTableAsCsv(table, agentName, tableIndex, messageDate) {
+        const csv = tableToCsv(table);
+        const filename = `${agentName}-${tableCsvSlug(table, tableIndex)}-${formatFileDate(messageDate)}.csv`;
+        downloadBlob(
+          filename,
+          new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" })
+        );
+      }
+
+      function markdownTableToCsv(text) {
+        const lines = (text ?? "").split("\n");
+        const tableLines = lines.filter(
+          (line) => line.trim().startsWith("|") && line.trim().endsWith("|")
+        );
+
+        const dataLines = tableLines.filter(
+          (line) => !line.match(/^\s*\|[\s\-:|]+\|\s*$/)
+        );
+
+        if (!dataLines.length) return null;
+
+        return dataLines
+          .map((line) => {
+            const cells = line
+              .split("|")
+              .slice(1, -1)
+              .map((cell) => {
+                const clean = cleanCsvCellValue(cell.trim());
+                return /[",\n]/.test(clean)
+                  ? `"${clean.replace(/"/g, '""')}"`
+                  : clean;
+              });
+            return cells.join(",");
+          })
+          .join("\n");
+      }
+
+      function findSourceBubbleForCsv(message, filterAgentName) {
+        if (message?.id && !isExportStatusMessage(message.content)) {
+          const group = messagesEl.querySelector(
+            `.msg-group.agent[data-message-id="${CSS.escape(message.id)}"]`
+          );
+          const bubbleFromMessage = group?.querySelector(
+            ".bubble-reid, .bubble-leo, .bubble-mason, .bubble"
+          );
+          if (bubbleFromMessage?.querySelector("table")) {
+            return bubbleFromMessage;
+          }
+        }
+
+        const agentBubbles = Array.from(
+          messagesEl.querySelectorAll(".bubble-reid, .bubble-leo, .bubble-mason")
+        ).reverse();
+
+        for (const bubble of agentBubbles) {
+          const text = (bubble.textContent || "").toLowerCase();
+          if (
+            EXPORT_TARGET_IGNORE_PHRASES.some((phrase) => text.includes(phrase)) ||
+            EXPORT_CONFIRMATIONS.some((phrase) => text.includes(phrase))
+          ) {
+            continue;
+          }
+          if (filterAgentName) {
+            const parentMsg = bubble.closest("[data-agent]");
+            if (parentMsg && parentMsg.dataset.agent !== filterAgentName) {
+              continue;
+            }
+          }
+          if (bubble.querySelector("table")) {
+            return bubble;
+          }
+        }
+
+        if (message?.id && !isExportStatusMessage(message.content)) {
+          const group = messagesEl.querySelector(
+            `.msg-group.agent[data-message-id="${CSS.escape(message.id)}"]`
+          );
+          const bubbleFromMessage = group?.querySelector(
+            ".bubble-reid, .bubble-leo, .bubble-mason, .bubble"
+          );
+          if (bubbleFromMessage) return bubbleFromMessage;
+        }
+
+        return getLastExportableAgentBubble(filterAgentName || message?.agent);
+      }
+
+      function getBubbleRawContent(sourceBubble, message) {
+        const encoded = sourceBubble?.getAttribute("data-raw-content");
+        if (encoded) {
+          try {
+            return decodeURIComponent(encoded);
+          } catch {
+            return encoded;
+          }
+        }
+
+        return stripAgentNamePrefix(message?.content ?? "");
+      }
+
+      function exportMessageAsCsv(message, filterAgentName) {
+        const agentName = AGENT_META[message.agent]?.name || message.agent;
+        const sourceBubble = findSourceBubbleForCsv(message, filterAgentName);
+        let downloaded = false;
+
+        if (sourceBubble) {
+          const tables = sourceBubble.querySelectorAll("table");
+          if (tables.length) {
+            tables.forEach((table, index) => {
+              downloadTableAsCsv(table, agentName, index, message.created_at);
+            });
+            downloaded = true;
+          }
+        }
+
+        if (!downloaded) {
+          console.log("No table found — attempting text fallback");
+          const rawContent = getBubbleRawContent(sourceBubble, message);
+          const csv = markdownTableToCsv(rawContent);
+
+          if (csv) {
+            const filename = `${agentName}-export-${formatFileDate(message.created_at)}.csv`;
+            downloadBlob(
+              filename,
+              new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" })
+            );
+            downloaded = true;
+          }
+        }
+
+        if (!downloaded) {
+          console.warn("No tables found in agent response for CSV export");
+        }
+
+        return downloaded;
+      }
+
+      async function triggerAutoFileExport(
+        exportType,
+        agentMessages,
+        messageText = ""
+      ) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+
+        const message = agentMessages[0];
+        const exportAgentName = resolveExportAgentName(
+          messageText,
+          message,
+          exportType
+        );
+        const filterAgentName =
+          getTaggedAgentFromText(messageText) || message?.agent || null;
+
+        if (!message) {
+          await sendAgentConfirmation(
+            exportAgentName,
+            FILE_EXPORT_AGENT_MESSAGES[exportType]?.failure ||
+              FILE_EXPORT_AGENT_MESSAGES.csv.failure
+          );
+          return;
+        }
+
+        try {
+          switch (exportType) {
+            case "csv": {
+              const downloaded = exportMessageAsCsv(message, filterAgentName);
+              await sendAgentConfirmation(
+                exportAgentName,
+                downloaded
+                  ? FILE_EXPORT_AGENT_MESSAGES.csv.success
+                  : FILE_EXPORT_AGENT_MESSAGES.csv.failure
+              );
+              break;
+            }
+            case "pdf": {
+              try {
+                downloadAsHtml(message, filterAgentName);
+                await sendAgentConfirmation(
+                  exportAgentName,
+                  FILE_EXPORT_AGENT_MESSAGES.pdf.success
+                );
+              } catch (err) {
+                console.error("HTML export failed:", err);
+                await sendAgentConfirmation(
+                  exportAgentName,
+                  FILE_EXPORT_AGENT_MESSAGES.pdf.failure
+                );
+              }
+              break;
+            }
+            case "excel": {
+              showAgentTyping(exportAgentName);
+              try {
+                await generateSkillFileDownload(
+                  "/api/generate-excel",
+                  message,
+                  "xlsx"
+                );
+                hideAgentTyping();
+                await sendAgentConfirmation(
+                  exportAgentName,
+                  FILE_EXPORT_AGENT_MESSAGES.excel.success
+                );
+              } catch (err) {
+                console.error("Excel export failed:", err);
+                hideAgentTyping();
+                await sendAgentConfirmation(
+                  exportAgentName,
+                  FILE_EXPORT_AGENT_MESSAGES.excel.failure
+                );
+              }
+              break;
+            }
+            case "word": {
+              showAgentTyping(exportAgentName);
+              try {
+                const agentName =
+                  AGENT_META[message.agent]?.name || message.agent;
+                const chatTitle = currentChat?.title || "Untitled";
+                const filename = `${agentName}-${slugifyFilename(chatTitle)}.docx`;
+                const documentText = stripAgentNamePrefix(message.content);
+                await generateWordDownload(documentText, filename);
+                hideAgentTyping();
+                await sendAgentConfirmation(
+                  exportAgentName,
+                  FILE_EXPORT_AGENT_MESSAGES.word.success
+                );
+              } catch (err) {
+                console.error("DOCX Generation Error:", err);
+                showToast(
+                  "Document generation failed. Check console for details."
+                );
+                hideAgentTyping();
+                await sendAgentConfirmation(
+                  exportAgentName,
+                  FILE_EXPORT_AGENT_MESSAGES.word.failure
+                );
+              }
+              break;
+            }
+            default:
+              break;
+          }
+        } catch (err) {
+          console.error("File export failed:", err);
+          if (exportType === "csv") {
+            await sendAgentConfirmation(
+              exportAgentName,
+              FILE_EXPORT_AGENT_MESSAGES.csv.failure
+            );
+          } else if (exportType === "pdf") {
+            await sendAgentConfirmation(
+              exportAgentName,
+              FILE_EXPORT_AGENT_MESSAGES.pdf.failure
+            );
+          }
+        }
+      }
+
+      function buildConversationContext(limit = 10) {
+        return messages
+          .slice(-limit)
+          .map((entry) => {
+            if (entry.role === "user") {
+              return `Taylor: ${entry.content}`;
+            }
+            const name = AGENT_META[entry.agent]?.name || entry.agent;
+            return `${name}: ${stripAgentNamePrefix(entry.content)}`;
+          })
+          .join("\n\n");
+      }
+
+      async function generateSkillFileDownload(endpoint, message, extension) {
+        const agentName = AGENT_META[message.agent]?.name || message.agent;
+        const chatTitle = currentChat?.title || "Untitled";
+        const filename = `${agentName}-${slugifyFilename(chatTitle)}.${extension}`;
+
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: stripAgentNamePrefix(message.content),
+              context: buildConversationContext(10),
+            }),
+          });
+
+          const contentType = response.headers.get("content-type") ?? "";
+
+          if (contentType.includes("application/json")) {
+            const result = await response.json();
+
+            if (!response.ok) {
+              throw new Error(
+                result.error ?? `Request failed (${response.status})`
+              );
+            }
+
+            throw new Error(
+              result.error ?? "Unexpected JSON response from file API"
+            );
+          }
+
+          if (!response.ok) {
+            let errorMessage = `Request failed (${response.status})`;
+            const contentType = response.headers.get("content-type") ?? "";
+            try {
+              if (contentType.includes("application/json")) {
+                const errorData = await response.json();
+                if (errorData.error) errorMessage = errorData.error;
+              } else {
+                const text = (await response.text()).trim();
+                if (
+                  response.status >= 500 &&
+                  (!text || text === "Internal Server Error")
+                ) {
+                  errorMessage =
+                    "File generation server is not running. Restart with npm run dev from the project root.";
+                } else if (text) {
+                  errorMessage = text;
+                }
+              }
+            } catch {
+              if (response.status >= 500) {
+                errorMessage =
+                  "File generation server is not running. Restart with npm run dev from the project root.";
+              }
+            }
+            throw new Error(errorMessage);
+          }
+
+          const blob = await response.blob();
+          downloadBlob(filename, blob);
+        } catch (err) {
+          console.error(err);
+          throw err;
+        }
+      }
+
+      function truncateTitle(text, max = 40) {
+        const trimmed = text.trim().replace(/\s+/g, " ");
+        if (trimmed.length <= max) return trimmed;
+        return `${trimmed.slice(0, max - 1).trim()}…`;
+      }
+
+      function getInitials(name) {
+        if (!name) return "TM";
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+
+      function formatTime(dateStr) {
+        return new Date(dateStr).toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }
+
+      function formatChatMeta(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const sameYear = date.getFullYear() === now.getFullYear();
+        const datePart = date.toLocaleDateString([], {
+          month: "short",
+          day: "numeric",
+          ...(sameYear ? {} : { year: "numeric" }),
+        });
+        return `${datePart} · ${formatTime(dateStr)}`;
+      }
+
+      function formatFullDate(dateStr) {
+        return new Date(dateStr).toLocaleString([], {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }
+
+      function formatDateSeparator(dateStr) {
+        return new Date(dateStr).toLocaleDateString([], {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+      }
+
+      function isSameDay(a, b) {
+        const da = new Date(a);
+        const db = new Date(b);
+        return (
+          da.getFullYear() === db.getFullYear() &&
+          da.getMonth() === db.getMonth() &&
+          da.getDate() === db.getDate()
+        );
+      }
+
+      function startOfDay(date) {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      }
+
+      function groupChatsByPeriod(chatItems) {
+        const now = new Date();
+        const todayStart = startOfDay(now);
+        const weekStart = new Date(todayStart);
+        weekStart.setDate(weekStart.getDate() - 7);
+
+        const groups = { Today: [], "This Week": [], Earlier: [] };
+
+        for (const chat of chatItems) {
+          const updated = new Date(chat.updated_at);
+          if (updated >= todayStart) {
+            groups.Today.push(chat);
+          } else if (updated >= weekStart) {
+            groups["This Week"].push(chat);
+          } else {
+            groups.Earlier.push(chat);
+          }
+        }
+
+        return groups;
+      }
+
+      function autoResize(textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+      }
+
+      function insertTag(tag) {
+        if (!messageInput.value.startsWith(tag.trim())) {
+          messageInput.value = tag + messageInput.value;
+        }
+        messageInput.focus();
+        autoResize(messageInput);
+      }
+
+      function scrollToBottom() {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      function scrollAgentMessageIntoView(target) {
+        const el =
+          typeof target === "string"
+            ? messagesEl.querySelector(target)
+            : target;
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
+      function getAgentScrollTarget(options = {}) {
+        if (options.messageId) {
+          return messagesEl.querySelector(
+            `[data-message-id="${CSS.escape(options.messageId)}"]`
+          );
+        }
+
+        if (options.agentKey) {
+          const keyed = messagesEl.querySelectorAll(
+            `.msg-group.agent[data-agent-key="${CSS.escape(options.agentKey)}"]`
+          );
+          if (keyed.length) return keyed[keyed.length - 1];
+        }
+
+        const agentGroups = messagesEl.querySelectorAll(".msg-group.agent");
+        return agentGroups.length
+          ? agentGroups[agentGroups.length - 1]
+          : null;
+      }
+
+      function setInputEnabled(enabled) {
+        messageInput.disabled = !enabled;
+        attachBtn.disabled = !enabled;
+        micBtn.disabled = !enabled;
+        if (enabled) {
+          updateSendButtonState();
+        } else {
+          sendBtn.disabled = true;
+        }
+      }
+
+      function updateSendButtonState() {
+        if (isWaiting) {
+          sendBtn.disabled = true;
+          return;
+        }
+        sendBtn.disabled = !(
+          messageInput.value.trim() || pendingAttachments.length
+        );
+      }
+
+      function getAttachmentIcon(category) {
+        switch (category) {
+          case "csv":
+            return "ti-file-spreadsheet";
+          case "pdf":
+            return "ti-file-type-pdf";
+          case "image":
+            return "ti-photo";
+          case "text":
+            return "ti-file-text";
+          default:
+            return "ti-file";
+        }
+      }
+
+      function addAttachmentFiles(fileList) {
+        const incoming = Array.from(fileList ?? []);
+
+        for (const file of incoming) {
+          if (!isAcceptedFile(file)) {
+            alert(`${file.name} is not a supported file type.`);
+            continue;
+          }
+
+          if (pendingAttachments.length >= MAX_ATTACHMENTS) {
+            alert(`You can attach up to ${MAX_ATTACHMENTS} files per message.`);
+            break;
+          }
+
+          const duplicate = pendingAttachments.some(
+            (item) => item.file.name === file.name && item.file.size === file.size
+          );
+          if (duplicate) continue;
+
+          const category = getFileCategory(file.name, file.type);
+          const previewUrl =
+            category === "image" ? URL.createObjectURL(file) : null;
+
+          pendingAttachments.push({
+            id: crypto.randomUUID(),
+            file,
+            previewUrl,
+          });
+        }
+
+        renderAttachmentChips();
+        updateSendButtonState();
+      }
+
+      function removeAttachment(attachmentId) {
+        const item = pendingAttachments.find(
+          (entry) => entry.id === attachmentId
+        );
+        if (item?.previewUrl) {
+          URL.revokeObjectURL(item.previewUrl);
+        }
+        pendingAttachments = pendingAttachments.filter(
+          (entry) => entry.id !== attachmentId
+        );
+        renderAttachmentChips();
+        updateSendButtonState();
+      }
+
+      function clearPendingAttachments({ keepPreviewUrls = [] } = {}) {
+        for (const item of pendingAttachments) {
+          if (item.previewUrl && !keepPreviewUrls.includes(item.previewUrl)) {
+            URL.revokeObjectURL(item.previewUrl);
+          }
+        }
+        pendingAttachments = [];
+        renderAttachmentChips();
+        updateSendButtonState();
+      }
+
+      function renderAttachmentChips() {
+        if (!pendingAttachments.length) {
+          attachmentChipsEl.classList.add("hidden");
+          attachmentChipsEl.innerHTML = "";
+          return;
+        }
+
+        attachmentChipsEl.classList.remove("hidden");
+        attachmentChipsEl.innerHTML = pendingAttachments
+          .map((item) => {
+            const category = getFileCategory(item.file.name, item.file.type);
+            const preview =
+              category === "image" && item.previewUrl
+                ? `<img class="attachment-thumb" src="${item.previewUrl}" alt="">`
+                : `<i class="ti ${getAttachmentIcon(category)}" aria-hidden="true"></i>`;
+
+            return `
+              <div class="attachment-chip" data-attachment-id="${item.id}">
+                ${preview}
+                <div class="attachment-chip-meta">
+                  <span class="attachment-chip-name">${escapeHtml(item.file.name)}</span>
+                  <span class="attachment-chip-size">${formatFileSize(item.file.size)}</span>
+                </div>
+                <button type="button" class="attachment-chip-remove" aria-label="Remove ${escapeHtml(item.file.name)}">
+                  <i class="ti ti-x" aria-hidden="true"></i>
+                </button>
+              </div>
+            `;
+          })
+          .join("");
+
+        attachmentChipsEl
+          .querySelectorAll(".attachment-chip-remove")
+          .forEach((button) => {
+            button.addEventListener("click", () => {
+              removeAttachment(button.closest(".attachment-chip").dataset.attachmentId);
+            });
+          });
+      }
+
+      function renderMessageAttachments(message) {
+        if (!message.attachments?.length) return "";
+
+        const chips = message.attachments
+          .map((attachment, index) => {
+            const previewUrl = imagePreviewUrls.get(`${message.id}:${index}`);
+
+            if (attachment.category === "image" && previewUrl) {
+              return `
+                <button
+                  type="button"
+                  class="msg-attachment-image"
+                  data-full-src="${previewUrl}"
+                  aria-label="View ${escapeHtml(attachment.name)}"
+                >
+                  <img src="${previewUrl}" alt="${escapeHtml(attachment.name)}">
+                </button>
+              `;
+            }
+
+            const iconClass =
+              attachment.category === "csv"
+                ? "ti-file-spreadsheet"
+                : attachment.category === "pdf"
+                  ? "ti-file-type-pdf"
+                  : attachment.category === "image"
+                    ? "ti-photo"
+                    : "ti-file";
+
+            return `
+              <div class="msg-attachment-chip">
+                <i class="ti ${iconClass}" aria-hidden="true"></i>
+                <div class="msg-attachment-chip-meta">
+                  <span class="msg-attachment-chip-name">${escapeHtml(attachment.name)}</span>
+                  <span class="msg-attachment-chip-size">${formatFileSize(attachment.size)}</span>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        return `<div class="msg-attachments">${chips}</div>`;
+      }
+
+      function bindAttachmentInteractions() {
+        messagesEl.querySelectorAll(".msg-attachment-image").forEach((button) => {
+          button.addEventListener("click", () => {
+            const src = button.dataset.fullSrc;
+            if (!src) return;
+
+            const overlay = document.createElement("div");
+            overlay.className = "image-lightbox";
+            overlay.innerHTML = `
+              <button type="button" class="image-lightbox-close" aria-label="Close preview">&times;</button>
+              <img src="${src}" alt="Attachment preview">
+            `;
+
+            const close = () => overlay.remove();
+            overlay.addEventListener("click", (event) => {
+              if (
+                event.target === overlay ||
+                event.target.closest(".image-lightbox-close")
+              ) {
+                close();
+              }
+            });
+
+            document.body.appendChild(overlay);
+          });
+        });
+      }
+
+      function showDropZone(show) {
+        dropZoneOverlay.classList.toggle("hidden", !show);
+      }
+
+      function showAgentTyping(agentKey) {
+        typingAgentKey = agentKey;
+        isTypingVisible = true;
+        renderMessages({
+          scrollBehavior: "agent-start",
+          scrollToAgentKey: agentKey,
+        });
+      }
+
+      function hideAgentTyping() {
+        isTypingVisible = false;
+        typingAgentKey = null;
+        renderMessages({ scrollBehavior: "none" });
+      }
+
+      function renderTypingIndicator() {
+        if (!isTypingVisible) return "";
+
+        if (typingAgentKey && AGENT_META[typingAgentKey]) {
+          const meta = AGENT_META[typingAgentKey];
+          return `
+            <div class="msg-group agent" data-agent-key="${escapeHtml(typingAgentKey)}">
+              <div class="msg-header">
+                ${renderAgentAvatar(meta, AVATAR_ICON_SIZES.message, "", "msg-av")}
+                <span class="msg-sender ${meta.senderClass}">${escapeHtml(meta.name)}</span>
+              </div>
+              <div class="bubble ${meta.bubbleClass}">
+                <div class="typing-indicator">
+                  <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="msg-group agent">
+            <div class="typing-indicator">
+              <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+              </div>
+              <span class="typing-label">Agents are responding…</span>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderHandoff(agentKey) {
+        const meta = AGENT_META[agentKey];
+        if (!meta) return "";
+        return `
+          <div class="handoff-line">
+            <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            <span>${escapeHtml(meta.name)} picking up</span>
+          </div>
+        `;
+      }
+
+      function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      async function autoTriggerFlaggedAgent(sourceAgent, targetAgent, flagContext) {
+        await delay(800);
+
+        showAgentTyping(targetAgent);
+
+        const history = await getMessagesForContext(currentChat.id);
+        const sourceName =
+          AGENT_META[sourceAgent]?.name ||
+          sourceAgent.charAt(0).toUpperCase() + sourceAgent.slice(1);
+        const followUp = buildFlagFollowUpUserMessage(sourceName, flagContext);
+        const memoryInput = await getAgentMemory(
+          userId,
+          activeModule.moduleType === "business"
+            ? activeBusiness
+            : { id: activeModule.id }
+        );
+        const content = await getAgentResponse(
+          targetAgent,
+          history,
+          followUp,
+          { memoryFacts: memoryInput }
+        );
+
+        hideAgentTyping();
+        await saveAgentResponse(targetAgent, content, {
+          flaggedBy: sourceAgent,
+        });
+      }
+
+      async function runFlagFollowUps(primaryResponses, satisfiedAgents) {
+        const responded = new Set(satisfiedAgents);
+        const processedFlagKeys = new Set();
+
+        for (const { agent: sourceAgent, content } of primaryResponses) {
+          if (!content || !sourceAgent) continue;
+
+          const flags = detectAgentFlags(sourceAgent, content);
+          for (const { targetAgent, context } of flags) {
+            const flagKey = `${sourceAgent}->${targetAgent}`;
+            if (processedFlagKeys.has(flagKey)) continue;
+            if (responded.has(targetAgent)) continue;
+
+            processedFlagKeys.add(flagKey);
+            responded.add(targetAgent);
+
+            await autoTriggerFlaggedAgent(sourceAgent, targetAgent, context);
+          }
+        }
+      }
+
+      function showEphemeralAgentMessage(agentKey, messageText) {
+        ephemeralMessages.push({
+          id: `ephemeral-${Date.now()}-${agentKey}`,
+          role: "assistant",
+          agent: agentKey,
+          content: messageText,
+          created_at: new Date().toISOString(),
+        });
+        renderMessages({
+          scrollBehavior: "agent-start",
+          scrollToAgentKey: agentKey,
+        });
+      }
+
+      async function saveAgentResponse(agentKey, content, options = {}) {
+        if (isRateLimitedResponse(content)) {
+          const saved = await saveMessage(
+            currentChat.id,
+            userId,
+            "assistant",
+            content.message,
+            agentKey,
+            null,
+            activeModule.id,
+            { flaggedBy: options.flaggedBy }
+          );
+          messages.push(saved);
+          syncMessagesCacheForCurrentChat();
+          renderMessages({ scrollBehavior: "none" });
+          return null;
+        }
+
+        const saved = await saveMessage(
+          currentChat.id,
+          userId,
+          "assistant",
+          content,
+          agentKey,
+          null,
+          activeModule.id,
+          { flaggedBy: options.flaggedBy }
+        );
+        messages.push(saved);
+        syncMessagesCacheForCurrentChat();
+        renderMessages({ scrollBehavior: "none" });
+        return saved;
+      }
+
+      function renderUserMessage(message) {
+        const attachmentHtml = renderMessageAttachments(message);
+        const textHtml = message.content
+          ? `<div class="bubble-text">${escapeHtml(message.content)}</div>`
+          : "";
+
+        return `
+          <div class="msg-group you">
+            <div class="msg-header reverse">
+              <div class="msg-av av-you">${escapeHtml(userInitials)}</div>
+              <span class="msg-time">${formatTime(message.created_at)}</span>
+              <span class="msg-sender you">Me</span>
+            </div>
+            <div class="bubble">
+              ${attachmentHtml}
+              ${textHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAgentMessage(message) {
+        const meta = AGENT_META[message.agent];
+        if (!meta) return "";
+
+        const displayContent = stripAgentNamePrefix(message.content);
+        const flaggedByMeta = message.flagged_by
+          ? AGENT_META[message.flagged_by]
+          : null;
+        const flaggedByLabel = flaggedByMeta
+          ? `<span class="msg-flagged-by">↩ flagged by ${escapeHtml(flaggedByMeta.name)}</span>`
+          : "";
+
+        return `
+          <div class="msg-group agent" data-message-id="${escapeHtml(message.id)}" data-agent-key="${escapeHtml(message.agent)}" data-agent="${escapeHtml(message.agent)}">
+            <div class="msg-header">
+              ${renderAgentAvatar(meta, AVATAR_ICON_SIZES.message, "", "msg-av")}
+              <div class="msg-sender-block">
+                <span class="msg-sender ${meta.senderClass}">${escapeHtml(meta.name)}</span>
+                ${flaggedByLabel}
+              </div>
+              <span class="msg-time">${formatTime(message.created_at)}</span>
+            </div>
+            <div class="bubble ${meta.bubbleClass}" data-raw-content="${encodeURIComponent(displayContent)}">
+              <span class="agent-tag ${meta.tagClass}">${escapeHtml(meta.role)}</span>
+              <div class="bubble-md">${renderAgentMarkdown(displayContent)}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderMessages(options = {}) {
+        const scrollBehavior = options.scrollBehavior ?? "none";
+        const displayMessages = [...messages, ...ephemeralMessages];
+
+        if (!currentChat && displayMessages.length === 0) {
+          const agentEntries = Object.entries(AGENT_META);
+          const agentNames = agentEntries.map(([, m]) => m.name).join(", ");
+          const tagList = agentEntries.map(([, m]) => `@${m.name}`).join(", ");
+          messagesEl.innerHTML = `
+            <div class="empty-state">
+              <h2>Start a new conversation</h2>
+              <p>Message ${agentNames}. Tag an agent with ${tagList} — or let us auto-route your question.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const parts = [];
+
+        if (displayMessages.length > 0) {
+          const first = displayMessages[0];
+          parts.push(
+            `<div class="system-msg">Chat started · ${formatFullDate(first.created_at)}</div>`
+          );
+
+          let lastDate = null;
+          let lastAgent = null;
+
+          for (const message of displayMessages) {
+            if (!lastDate || !isSameDay(lastDate, message.created_at)) {
+              parts.push(
+                `<div class="system-msg">${formatDateSeparator(message.created_at)}</div>`
+              );
+              lastDate = message.created_at;
+            }
+
+            if (message.role === "assistant") {
+              if (lastAgent && lastAgent !== message.agent) {
+                parts.push(renderHandoff(message.agent));
+              }
+              lastAgent = message.agent;
+              parts.push(renderAgentMessage(message));
+            } else if (message.role === "user") {
+              parts.push(renderUserMessage(message));
+            }
+          }
+        } else if (currentChat) {
+          parts.push(
+            `<div class="system-msg">Chat started · ${formatFullDate(currentChat.created_at)}</div>`
+          );
+          parts.push(`
+            <div class="empty-state" style="flex:0;padding:2rem 1rem;">
+              <p>Send a message to begin this conversation.</p>
+            </div>
+          `);
+        }
+
+        parts.push(renderTypingIndicator());
+        messagesEl.innerHTML = parts.join("");
+        bindAttachmentInteractions();
+
+        if (scrollBehavior === "bottom") {
+          scrollToBottom();
+        } else if (scrollBehavior === "agent-start") {
+          const target = getAgentScrollTarget({
+            messageId: options.messageId,
+            agentKey: options.scrollToAgentKey ?? typingAgentKey,
+          });
+          scrollAgentMessageIntoView(target);
+        }
+      }
+
+      function renderSidebar() {
+        chatListEl.innerHTML = "";
+        chatListEl.appendChild(newChatBtn);
+
+        const groups = groupChatsByPeriod(chats);
+
+        for (const [label, items] of Object.entries(groups)) {
+          if (!items.length) continue;
+
+          const sectionLabel = document.createElement("div");
+          sectionLabel.className = "chat-section-label";
+          sectionLabel.textContent = label;
+          chatListEl.appendChild(sectionLabel);
+
+          for (const chat of items) {
+            const row = document.createElement("div");
+            row.className = "chat-item-row";
+            if (currentChat?.id === chat.id && activePage === "chat") {
+              row.classList.add("active");
+            }
+
+            if (pendingDeleteChatId === chat.id) {
+              row.classList.add("confirming");
+              row.innerHTML = `
+                <div class="chat-item-confirm">
+                  <span class="chat-item-confirm-text">Delete this chat?</span>
+                  <div class="chat-item-confirm-actions">
+                    <button type="button" class="chat-delete-btn chat-delete-cancel">Cancel</button>
+                    <button type="button" class="chat-delete-btn chat-delete-confirm">Delete</button>
+                  </div>
+                </div>
+              `;
+              row
+                .querySelector(".chat-delete-cancel")
+                .addEventListener("click", (event) => {
+                  event.stopPropagation();
+                  pendingDeleteChatId = null;
+                  renderSidebar();
+                });
+              row
+                .querySelector(".chat-delete-confirm")
+                .addEventListener("click", async (event) => {
+                  event.stopPropagation();
+                  await confirmDeleteChat(chat.id);
+                });
+            } else {
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "chat-item";
+              btn.innerHTML = `
+                <div class="chat-item-title">${escapeHtml(chat.title || "Untitled chat")}</div>
+                <div class="chat-item-meta">${formatChatMeta(chat.updated_at)}</div>
+              `;
+              btn.addEventListener("click", () => loadChat(chat.id));
+
+              const deleteBtn = document.createElement("button");
+              deleteBtn.type = "button";
+              deleteBtn.className = "chat-item-delete";
+              deleteBtn.setAttribute("aria-label", "Delete chat");
+              deleteBtn.innerHTML =
+                '<i class="ti ti-trash" aria-hidden="true"></i>';
+              deleteBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                pendingDeleteChatId = chat.id;
+                renderSidebar();
+              });
+
+              row.appendChild(btn);
+              row.appendChild(deleteBtn);
+            }
+
+            chatListEl.appendChild(row);
+          }
+        }
+      }
+
+      async function confirmDeleteChat(chatId) {
+        try {
+          await deleteChat(chatId, activeModule.id);
+          chats = chats.filter((chat) => chat.id !== chatId);
+          pendingDeleteChatId = null;
+
+          if (currentChat?.id === chatId) {
+            currentChat = null;
+            messages = [];
+            saveCurrentChatId(null);
+            await showPage("chat");
+            renderMessages();
+            updateTopbar();
+          }
+
+          renderSidebar();
+        } catch (err) {
+          console.error(err);
+          alert(err.message ?? "Failed to delete chat.");
+        }
+      }
+
+      function updateTopbar() {
+        document.querySelectorAll(".topbar-chat-only").forEach((el) => {
+          el.classList.remove("hidden");
+        });
+
+        if (!currentChat) {
+          topbarTitle.textContent = "New Chat";
+          topbarSub.textContent = "";
+          return;
+        }
+
+        topbarTitle.textContent = currentChat.title || "Untitled chat";
+        topbarSub.textContent = formatFullDate(
+          currentChat.updated_at || currentChat.created_at
+        );
+      }
+
+      function updateMemoryTopbar() {
+        document.querySelectorAll(".topbar-chat-only").forEach((el) => {
+          el.classList.add("hidden");
+        });
+        topbarTitle.textContent = "Agent Memory";
+        topbarSub.textContent = "";
+      }
+
+      function updateDocumentsPageHeader() {
+        if (docPageTitleEl) {
+          docPageTitleEl.textContent = `${activeModule.displayName} Documents`;
+        }
+        const docPageSubEl = document.getElementById("doc-page-sub");
+        if (docPageSubEl) {
+          const agentNames = Object.values(AGENT_META)
+            .map((m) => m.name)
+            .join(", ");
+          docPageSubEl.textContent = `Files uploaded here are available to ${agentNames} as context in every conversation.`;
+        }
+      }
+
+      function updateDocumentsTopbar() {
+        document.querySelectorAll(".topbar-chat-only").forEach((el) => {
+          el.classList.add("hidden");
+        });
+        topbarTitle.textContent = "Documents";
+        topbarSub.textContent = activeModule.displayName;
+      }
+
+      function getDocumentBusinessTargets() {
+        if (activeModule.moduleType !== "business") {
+          return [
+            { id: activeModule.id, displayName: activeModule.displayName },
+          ];
+        }
+        if (activeBusiness.isPortfolio && activeBusiness.businesses?.length) {
+          return activeBusiness.businesses.map((biz) => ({
+            id: biz.id,
+            displayName: biz.displayName,
+          }));
+        }
+        return [{ id: activeBusiness.id, displayName: activeBusiness.displayName }];
+      }
+
+      function formatVisibleAgents(metadata) {
+        const agents = getVisibleAgentsForDocument(metadata);
+        if (!agents.length) {
+          return "None — add tags so agents can use this file";
+        }
+        return agents.join(", ");
+      }
+
+      function closeDocPreview() {
+        docPreviewModal.classList.add("hidden");
+        docPreviewBodyEl.innerHTML = "";
+      }
+
+      async function showDocumentPreview(businessId, metadata) {
+        try {
+          const content = await getDocumentContent(metadata.docId);
+          const kind = metadata.storageKind ?? "";
+          let bodyHtml = "";
+
+          if (kind === "markdown" || kind === "csv" || kind === "document") {
+            const text = String(content ?? "");
+            const excerpt = text.slice(0, 300);
+            bodyHtml = escapeHtml(excerpt) + (text.length > 300 ? "…" : "");
+          } else if (kind === "image") {
+            const src = String(content ?? "");
+            bodyHtml = src
+              ? `<img src="${src}" alt="${escapeHtml(metadata.name)}" />`
+              : "<p>Image preview unavailable.</p>";
+          } else if (kind === "pdf") {
+            const pages = estimatePdfPageCount(String(content ?? ""));
+            bodyHtml = pages
+              ? `<p>PDF document — ${pages} page${pages === 1 ? "" : "s"}</p>`
+              : "<p>PDF document</p>";
+          } else if (kind === "xlsx" || kind === "csv" || kind === "spreadsheet") {
+            const previewText =
+              typeof content === "object" && content?.preview
+                ? content.preview
+                : spreadsheetPreviewText(content, 1200);
+            const summaryText =
+              typeof content === "object" && content?.summary
+                ? `<p>${escapeHtml(content.summary)}</p>`
+                : "";
+            const rowNote =
+              content?.rowCount != null
+                ? `<p><em>${content.rowCount} total rows</em></p>`
+                : "";
+            bodyHtml = `${summaryText}${rowNote}<pre>${escapeHtml(previewText)}</pre>`;
+          } else {
+            bodyHtml = escapeHtml(String(content ?? "").slice(0, 300));
+          }
+
+          docPreviewTitleEl.textContent = metadata.name ?? "Preview";
+          docPreviewBodyEl.innerHTML = bodyHtml;
+          docPreviewModal.classList.remove("hidden");
+        } catch (err) {
+          console.error(err);
+          alert(err.message ?? "Could not load preview.");
+        }
+      }
+
+      function clearPendingDocUpload() {
+        pendingDocUpload = null;
+      }
+
+      function buildAgentPreviewHtml(selectedTags) {
+        const metadata = { tags: [...selectedTags] };
+        const agents = getVisibleAgentsForDocument(metadata);
+        if (!agents.length) {
+          return "Which agents see this? <strong>None yet</strong> — select tags that match each agent's domain, or tag <strong>all</strong>.";
+        }
+        return `Which agents see this? <strong>${escapeHtml(agents.join(", "))}</strong>`;
+      }
+
+      function renderPendingUploadForm() {
+        if (!pendingDocUpload) {
+          return "";
+        }
+
+        const {
+          file,
+          name,
+          description,
+          selectedTags,
+          suggestedTags = new Set(),
+          businessId,
+        } = pendingDocUpload;
+        const businessTargets = getDocumentBusinessTargets();
+        const showBusinessPicker =
+          activeBusiness.isPortfolio && businessTargets.length > 1;
+
+        const activeTagOptions =
+          activeModule?.docTagOptions ?? DOC_TAG_OPTIONS;
+        const tagButtons = activeTagOptions.map((tag) => {
+          const selected = selectedTags.has(tag);
+          const suggested = suggestedTags.has(tag);
+          return `
+            <button
+              type="button"
+              class="doc-tag-option${selected ? " is-selected" : ""}${
+                suggested ? " is-suggested" : ""
+              }"
+              data-doc-tag="${tag}"
+            >
+              <span class="doc-tag-label">${tag}</span>
+              ${
+                suggested
+                  ? '<span class="doc-tag-suggested-label">Suggested</span>'
+                  : ""
+              }
+            </button>
+          `;
+        }).join("");
+
+        const businessField = showBusinessPicker
+          ? `
+            <div class="doc-field">
+              <label for="doc-form-business">Business</label>
+              <select id="doc-form-business">
+                ${businessTargets
+                  .map(
+                    (biz) => `
+                      <option value="${escapeHtml(biz.id)}"${
+                        biz.id === businessId ? " selected" : ""
+                      }>${escapeHtml(biz.displayName)}</option>
+                    `
+                  )
+                  .join("")}
+              </select>
+            </div>
+          `
+          : "";
+
+        return `
+          <div class="doc-form-card" id="doc-upload-form">
+            <div class="doc-form-title">Add document — ${escapeHtml(file.name)}</div>
+            ${businessField}
+            <div class="doc-field">
+              <label for="doc-form-name">Name</label>
+              <input type="text" id="doc-form-name" value="${escapeHtml(name)}" maxlength="200" />
+            </div>
+            <div class="doc-field">
+              <label for="doc-form-description">Description <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+              <textarea id="doc-form-description" placeholder="1–2 sentences about this file">${escapeHtml(description)}</textarea>
+            </div>
+            <div class="doc-field">
+              <label>Tags</label>
+              <div class="doc-tag-grid" id="doc-tag-grid">${tagButtons}</div>
+            </div>
+            <div class="doc-agent-preview" id="doc-agent-preview">${buildAgentPreviewHtml(selectedTags)}</div>
+            <div class="doc-form-error hidden" id="doc-form-error" role="alert"></div>
+            <div class="doc-form-actions">
+              <button type="button" class="doc-save-btn" id="doc-save-btn">Save document</button>
+              <button type="button" class="doc-cancel-btn" id="doc-cancel-btn">Cancel</button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderDocumentCard(metadata, businessName = null) {
+        const icon = getDocumentTypeIcon(metadata);
+        const tags = (metadata.tags ?? [])
+          .map((tag) => `<span class="doc-chip">${escapeHtml(tag)}</span>`)
+          .join("");
+        const visible = formatVisibleAgents(metadata);
+        const date = formatDocumentDate(metadata.createdAt ?? metadata.updatedAt);
+        const desc = metadata.description?.trim()
+          ? `<div class="doc-card-desc">${escapeHtml(metadata.description)}</div>`
+          : "";
+        const businessLabel = businessName
+          ? `<div class="doc-card-meta">${escapeHtml(businessName)}</div>`
+          : "";
+
+        return `
+          <article class="doc-card" data-doc-id="${escapeHtml(metadata.docId)}" data-business-id="${escapeHtml(metadata.businessId)}">
+            <div class="doc-card-icon" aria-hidden="true">${icon}</div>
+            <div class="doc-card-body">
+              <div class="doc-card-name">${escapeHtml(metadata.name)}</div>
+              ${desc}
+              <div class="doc-chip-row">${tags || '<span class="doc-chip">untagged</span>'}</div>
+              <div class="doc-card-meta">Visible to: ${escapeHtml(visible)}</div>
+              ${businessLabel}
+              <div class="doc-card-meta">Uploaded ${escapeHtml(date)}</div>
+            </div>
+            <div class="doc-card-actions">
+              <button type="button" class="doc-card-btn doc-preview-btn">Preview</button>
+              <button type="button" class="doc-card-btn doc-card-btn--danger doc-delete-btn">Delete</button>
+            </div>
+          </article>
+        `;
+      }
+
+      async function loadGroupedDocuments() {
+        const targets = getDocumentBusinessTargets();
+        const groups = [];
+
+        for (const target of targets) {
+          const docs = await listDocuments(target.id);
+          if (docs.length) {
+            groups.push({
+              businessId: target.id,
+              businessName: target.displayName,
+              docs,
+            });
+          }
+        }
+
+        return groups;
+      }
+
+      function renderDocumentsPanelContent(groups) {
+        updateDocumentsPageHeader();
+        const isPortfolio =
+          activeBusiness.isPortfolio && getDocumentBusinessTargets().length > 1;
+        const businessName = activeBusiness.displayName;
+
+        let filterBar = "";
+        if (isPortfolio) {
+          const targets = getDocumentBusinessTargets();
+          filterBar = `
+            <div class="doc-filter-bar" id="doc-filter-bar">
+              <button type="button" class="doc-filter-chip${
+                documentsBusinessFilter === "all" ? " is-active" : ""
+              }" data-doc-filter="all">All businesses</button>
+              ${targets
+                .map(
+                  (biz) => `
+                <button type="button" class="doc-filter-chip${
+                  documentsBusinessFilter === biz.id ? " is-active" : ""
+                }" data-doc-filter="${escapeHtml(biz.id)}">${escapeHtml(biz.displayName)}</button>
+              `
+                )
+                .join("")}
+            </div>
+          `;
+        }
+
+        const filteredGroups =
+          isPortfolio && documentsBusinessFilter !== "all"
+            ? groups.filter((g) => g.businessId === documentsBusinessFilter)
+            : groups;
+
+        const totalDocs = filteredGroups.reduce((n, g) => n + g.docs.length, 0);
+
+        let listHtml = "";
+        if (!totalDocs && !pendingDocUpload) {
+          listHtml = `
+            <div class="doc-empty">
+              No documents yet. Upload files to give your agents richer context about ${escapeHtml(businessName)}.
+            </div>
+          `;
+        } else if (isPortfolio && filteredGroups.length) {
+          for (const group of filteredGroups) {
+            listHtml += `<h3 class="doc-group-title">${escapeHtml(group.businessName)}</h3>`;
+            listHtml += group.docs
+              .map((doc) => renderDocumentCard(doc, null))
+              .join("");
+          }
+        } else if (filteredGroups.length === 1) {
+          listHtml = filteredGroups[0].docs
+            .map((doc) => renderDocumentCard(doc, null))
+            .join("");
+        } else if (totalDocs) {
+          for (const group of filteredGroups) {
+            listHtml += group.docs
+              .map((doc) => renderDocumentCard(doc, group.businessName))
+              .join("");
+          }
+        }
+
+        documentsBodyEl.innerHTML = `
+          <div class="doc-block">
+            ${filterBar}
+            <div
+              class="doc-upload-zone"
+              id="doc-upload-zone"
+            >
+              <div class="doc-upload-icon" aria-hidden="true">📁</div>
+              <div class="doc-upload-title">Drag and drop files here</div>
+              <div class="doc-upload-hint">
+                Accepted: .md .pdf .doc .docx .png .jpg .xlsx .csv · Max 25MB per file
+              </div>
+              <button type="button" class="doc-browse-btn" id="doc-browse-btn">Browse files</button>
+              <input
+                type="file"
+                id="doc-file-input"
+                accept="${DOC_ACCEPT_INPUT}"
+                hidden
+              />
+            </div>
+            ${renderPendingUploadForm()}
+            <div class="doc-list-section" id="doc-list-section">${listHtml}</div>
+          </div>
+        `;
+
+        bindDocumentsPanelEvents();
+      }
+
+      async function loadDocumentsForScope(moduleRequestId = scopeUi.moduleLoadId) {
+        const scopeId = activeModuleScopeId();
+        const cacheKey = documentsCacheKey(scopeId);
+        const loadId = scopeUi.bumpDocumentsLoad();
+        scopeUi.loading.documents = true;
+
+        const cached = scopeUi.docsCache.get(cacheKey);
+        if (cached) {
+          renderDocumentsPanelContent(cached);
+        } else {
+          renderPanelLoading(documentsBodyEl, "Loading documents…");
+        }
+
+        try {
+          const groups = await loadGroupedDocuments();
+          if (
+            !scopeUi.isDocumentsLoadCurrent(loadId) ||
+            scopeId !== activeModuleScopeId() ||
+            cacheKey !== documentsCacheKey(scopeId) ||
+            !scopeUi.isModuleLoadCurrent(moduleRequestId)
+          ) {
+            return;
+          }
+
+          scopeUi.docsCache.set(cacheKey, groups);
+          renderDocumentsPanelContent(groups);
+        } catch (err) {
+          if (!scopeUi.isDocumentsLoadCurrent(loadId)) return;
+          throw err;
+        } finally {
+          if (scopeUi.isDocumentsLoadCurrent(loadId)) {
+            scopeUi.loading.documents = false;
+          }
+        }
+      }
+
+      async function renderDocumentsPanel() {
+        await loadDocumentsForScope();
+      }
+
+      function showDocFormError(message) {
+        const el = documentsBodyEl.querySelector("#doc-form-error");
+        if (!el) return;
+        if (message) {
+          el.textContent = message;
+          el.classList.remove("hidden");
+        } else {
+          el.textContent = "";
+          el.classList.add("hidden");
+        }
+      }
+
+      function bindDocumentsPanelEvents() {
+        const zone = documentsBodyEl.querySelector("#doc-upload-zone");
+        const fileInput = documentsBodyEl.querySelector("#doc-file-input");
+        const browseBtn = documentsBodyEl.querySelector("#doc-browse-btn");
+
+        browseBtn?.addEventListener("click", () => fileInput?.click());
+
+        fileInput?.addEventListener("change", async () => {
+          const file = fileInput.files?.[0];
+          fileInput.value = "";
+          if (file) {
+            await handleDocumentFileSelected(file);
+          }
+        });
+
+        if (zone) {
+          zone.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            zone.classList.add("is-dragover");
+          });
+          zone.addEventListener("dragleave", () => {
+            zone.classList.remove("is-dragover");
+          });
+          zone.addEventListener("drop", async (event) => {
+            event.preventDefault();
+            zone.classList.remove("is-dragover");
+            const file = event.dataTransfer?.files?.[0];
+            if (file) {
+              await handleDocumentFileSelected(file);
+            }
+          });
+        }
+
+        documentsBodyEl.querySelectorAll("[data-doc-filter]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            documentsBusinessFilter = btn.dataset.docFilter;
+            renderPanelLoading(documentsBodyEl, "Loading documents…");
+            await renderDocumentsPanel();
+          });
+        });
+
+        documentsBodyEl.querySelectorAll("[data-doc-tag]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (!pendingDocUpload) return;
+            const tag = btn.dataset.docTag;
+            if (pendingDocUpload.selectedTags.has(tag)) {
+              pendingDocUpload.selectedTags.delete(tag);
+              btn.classList.remove("is-selected");
+            } else {
+              pendingDocUpload.selectedTags.add(tag);
+              btn.classList.add("is-selected");
+            }
+            const preview = documentsBodyEl.querySelector("#doc-agent-preview");
+            if (preview) {
+              preview.innerHTML = buildAgentPreviewHtml(pendingDocUpload.selectedTags);
+            }
+          });
+        });
+
+        documentsBodyEl.querySelector("#doc-form-business")?.addEventListener("change", (event) => {
+          if (pendingDocUpload) {
+            pendingDocUpload.businessId = event.target.value;
+          }
+        });
+
+        documentsBodyEl.querySelector("#doc-cancel-btn")?.addEventListener("click", async () => {
+          clearPendingDocUpload();
+          await renderDocumentsPanel();
+        });
+
+        documentsBodyEl.querySelector("#doc-save-btn")?.addEventListener("click", savePendingDocument);
+
+        documentsBodyEl.querySelectorAll(".doc-preview-btn").forEach((btn) => {
+          btn.addEventListener("click", async (event) => {
+            const card = event.target.closest(".doc-card");
+            const docId = card?.dataset.docId;
+            const businessId = card?.dataset.businessId;
+            const groups = await loadGroupedDocuments();
+            const metadata = groups
+              .flatMap((g) => g.docs)
+              .find((doc) => doc.docId === docId);
+            if (metadata) {
+              await showDocumentPreview(businessId, metadata);
+            }
+          });
+        });
+
+        documentsBodyEl.querySelectorAll(".doc-delete-btn").forEach((btn) => {
+          btn.addEventListener("click", async (event) => {
+            const card = event.target.closest(".doc-card");
+            const docId = card?.dataset.docId;
+            const businessId = card?.dataset.businessId;
+            const name =
+              card?.querySelector(".doc-card-name")?.textContent?.trim() ?? "this document";
+            if (
+              !confirm(`Delete "${name}"? This cannot be undone.`)
+            ) {
+              return;
+            }
+            try {
+              await deleteDocument(businessId, docId);
+              showToast("Document deleted");
+              invalidateDocumentsCacheForScope();
+              await loadDocumentsForScope();
+            } catch (err) {
+              console.error(err);
+              alert(err.message ?? "Failed to delete document.");
+            }
+          });
+        });
+      }
+
+      async function handleDocumentFileSelected(file) {
+        const error = validateDocumentFile(file);
+        if (error) {
+          alert(error);
+          return;
+        }
+
+        const targets = getDocumentBusinessTargets();
+        const selectedTags = new Set();
+        const suggestedTags = new Set();
+
+        if (!isImageDocumentFile(file)) {
+          try {
+            const processed = await processFile(file);
+            const scanText = getScanTextForTags(processed, file);
+            for (const tag of suggestTagsFromText(scanText)) {
+              suggestedTags.add(tag);
+              selectedTags.add(tag);
+            }
+          } catch (err) {
+            console.warn("Tag suggestion failed:", err);
+          }
+        }
+
+        pendingDocUpload = {
+          file,
+          name: file.name.replace(/\.[^.]+$/i, "") || file.name,
+          description: "",
+          selectedTags,
+          suggestedTags,
+          businessId: targets[0]?.id ?? activeBusiness.id,
+        };
+        await renderDocumentsPanel();
+      }
+
+      async function savePendingDocument() {
+        if (!pendingDocUpload) return;
+
+        const nameInput = documentsBodyEl.querySelector("#doc-form-name");
+        const descInput = documentsBodyEl.querySelector("#doc-form-description");
+        const businessSelect = documentsBodyEl.querySelector("#doc-form-business");
+        const saveBtn = documentsBodyEl.querySelector("#doc-save-btn");
+
+        const name = nameInput?.value?.trim() || pendingDocUpload.file.name;
+        const description = descInput?.value?.trim() ?? "";
+        const tags = [...pendingDocUpload.selectedTags];
+        const businessId =
+          businessSelect?.value ?? pendingDocUpload.businessId ?? activeBusiness.id;
+
+        if (!tags.length) {
+          showDocFormError("Select at least one tag so agents know when to use this file.");
+          return;
+        }
+
+        showDocFormError("");
+        if (saveBtn) saveBtn.disabled = true;
+
+        try {
+          await saveDocument(businessId, pendingDocUpload.file, {
+            name,
+            type: pendingDocUpload.file.type,
+            description,
+            tags,
+          });
+          clearPendingDocUpload();
+          showToast("Document saved");
+          invalidateDocumentsCacheForScope();
+          await loadDocumentsForScope();
+        } catch (err) {
+          console.error(err);
+          showDocFormError(err.message ?? "Failed to save document.");
+        } finally {
+          if (saveBtn) saveBtn.disabled = false;
+        }
+      }
+
+      async function showPage(page, options = {}) {
+        activePage = page;
+        pageChat.classList.toggle("active", page === "chat");
+        pageMemory.classList.toggle("active", page === "memory");
+        pageDocuments.classList.toggle("active", page === "documents");
+        navMemoryBtn.classList.toggle("active-nav", page === "memory");
+        navDocumentsBtn.classList.toggle("active-nav", page === "documents");
+
+        if (page === "memory") {
+          closeSidebar();
+          updateMemoryTopbar();
+          try {
+            await loadMemoryForScope();
+          } catch (err) {
+            console.error("Failed to load memory:", err);
+            memoryBodyEl.innerHTML = isMissingTableError(err)
+              ? renderDatabaseSetupHelp()
+              : `<p class="mem-fact-text">Memory could not be loaded. ${escapeHtml(err.message ?? "")}</p>`;
+          }
+        } else if (page === "documents") {
+          closeSidebar();
+          closeDocPreview();
+          updateDocumentsTopbar();
+          try {
+            await loadDocumentsForScope();
+          } catch (err) {
+            console.error("Failed to load documents:", err);
+            documentsBodyEl.innerHTML = `<p class="doc-empty">Documents could not be loaded. ${escapeHtml(err.message ?? "")}</p>`;
+          }
+        } else if (!options.skipChatReload) {
+          updateTopbar();
+        }
+
+        renderSidebar();
+      }
+
+      async function refreshChats() {
+        const scopeId = activeModuleScopeId();
+        chats = await getChats(userId, scopeId);
+        scopeUi.chatsCache.set(scopeId, chats);
+        if (currentChat) {
+          currentChat = chats.find((c) => c.id === currentChat.id) ?? currentChat;
+        }
+        renderSidebar();
+        updateTopbar();
+      }
+
+      async function loadChat(chatId, options = {}) {
+        const chatLoadId = scopeUi.bumpChatLoad();
+        const moduleRequestId = options.moduleRequestId ?? scopeUi.moduleLoadId;
+        const scopeId = activeModuleScopeId();
+
+        closeSidebar();
+
+        currentChat = chats.find((c) => c.id === chatId) ?? null;
+        messages = [];
+        scopeUi.loading.messages = true;
+
+        const msgCacheKey = scopeUi.messagesCacheKey(scopeId, chatId);
+        const cachedMsgs = scopeUi.messagesCache.get(msgCacheKey);
+        if (cachedMsgs) {
+          messages = [...cachedMsgs];
+          scopeUi.loading.messages = false;
+          renderMessages({ scrollBehavior: "none" });
+          if (currentChat) {
+            updateTopbar();
+          } else {
+            topbarTitle.textContent = "Loading…";
+            topbarSub.textContent = "";
+          }
+        } else {
+          renderMessagesLoading();
+          if (currentChat) {
+            topbarTitle.textContent = currentChat.title || "Untitled chat";
+            topbarSub.textContent = "";
+          } else {
+            topbarTitle.textContent = "Loading…";
+            topbarSub.textContent = "";
+          }
+        }
+
+        renderSidebar();
+
+        try {
+          if (!currentChat) {
+            const all = await getChats(userId, scopeId);
+            if (
+              !scopeUi.isChatLoadCurrent(chatLoadId) ||
+              !scopeUi.isModuleLoadCurrent(moduleRequestId) ||
+              scopeId !== activeModuleScopeId()
+            ) {
+              return;
+            }
+            chats = all;
+            scopeUi.chatsCache.set(scopeId, all);
+            currentChat = all.find((c) => c.id === chatId) ?? null;
+            renderSidebar();
+          }
+
+          if (!currentChat) return;
+
+          const fetched = await getMessages(chatId, scopeId);
+          if (
+            !scopeUi.isChatLoadCurrent(chatLoadId) ||
+            chatId !== currentChat?.id ||
+            !scopeUi.isModuleLoadCurrent(moduleRequestId) ||
+            scopeId !== activeModuleScopeId()
+          ) {
+            return;
+          }
+
+          messages = fetched;
+          scopeUi.messagesCache.set(msgCacheKey, fetched);
+          saveCurrentChatId(chatId);
+
+          if (activePage !== "chat") {
+            await showPage("chat", { skipChatReload: true });
+          }
+          renderMessages({ scrollBehavior: "bottom" });
+          updateTopbar();
+          renderSidebar();
+          messageInput.focus();
+        } finally {
+          if (scopeUi.isChatLoadCurrent(chatLoadId)) {
+            scopeUi.loading.messages = false;
+          }
+        }
+      }
+
+      async function startNewChat(options = {}) {
+        const moduleRequestId = options.moduleRequestId ?? scopeUi.moduleLoadId;
+        scopeUi.bumpChatLoad();
+        closeSidebar();
+        currentChat = null;
+        messages = [];
+        scopeUi.loading.messages = false;
+        saveCurrentChatId(null);
+        if (
+          !scopeUi.isModuleLoadCurrent(moduleRequestId) ||
+          activeModuleScopeId() !== getActiveModuleId()
+        ) {
+          return;
+        }
+        await showPage("chat", { skipChatReload: true });
+        renderMessages();
+        updateTopbar();
+        messageInput.focus();
+      }
+
+      async function ensureChat(firstMessageText) {
+        if (currentChat) return currentChat;
+
+        const title = truncateTitle(firstMessageText);
+        const moduleMeta = buildChatModuleMeta();
+        logChatPersist("create chat", {
+          activeModule: {
+            id: activeModule.id,
+            type: activeModule.moduleType,
+            name: activeModule.displayName,
+          },
+          storageKey: CHAT_HISTORY_KEY,
+          moduleMeta,
+        });
+        const chat = await createChat(
+          userId,
+          title,
+          activeModuleScopeId(),
+          moduleMeta
+        );
+        logChatPersist("chat saved", {
+          chat,
+          serialized: JSON.stringify(chat),
+        });
+        currentChat = chat;
+        chats.unshift(chat);
+        saveCurrentChatId(chat.id);
+        renderSidebar();
+        logChatPersist("sidebar chats", {
+          count: chats.length,
+          titles: chats.map((c) => c.title),
+        });
+        updateTopbar();
+        return chat;
+      }
+
+      async function sendMessage() {
+        let text = messageInput.value.trim();
+        const files = pendingAttachments.map((item) => item.file);
+
+        if ((!text && !files.length) || isWaiting) return;
+
+        ephemeralMessages = [];
+
+        if (!text && files.length) {
+          text = getAutoPlaceholder(files);
+        }
+
+        text = applyUspsFastTrack(text, files);
+
+        const exportType = detectExportKeyword(text);
+
+        const attachmentsMeta = files.length
+          ? buildAttachmentMetadata(files)
+          : null;
+        const titleSource = text || files[0]?.name || "New chat";
+        const isFirstMessage = !currentChat || messages.length === 0;
+        const imagePreviewSnapshot = pendingAttachments
+          .filter(
+            (item) =>
+              getFileCategory(item.file.name, item.file.type) === "image" &&
+              item.previewUrl
+          )
+          .map((item) => item.previewUrl);
+
+        messageInput.value = "";
+        autoResize(messageInput);
+        clearPendingAttachments({ keepPreviewUrls: imagePreviewSnapshot });
+        setInputEnabled(false);
+        isWaiting = true;
+
+        try {
+          await ensureChat(titleSource);
+
+          if (isFirstMessage) {
+            const title = truncateTitle(titleSource);
+            currentChat = await updateChatTitle(
+              currentChat.id,
+              title,
+              activeModuleScopeId()
+            );
+          }
+
+          const userMessage = await saveMessage(
+            currentChat.id,
+            userId,
+            "user",
+            text,
+            null,
+            attachmentsMeta,
+            activeModuleScopeId()
+          );
+
+          if (attachmentsMeta) {
+            let imageIndex = 0;
+            attachmentsMeta.forEach((attachment, index) => {
+              if (
+                attachment.category === "image" &&
+                imagePreviewSnapshot[imageIndex]
+              ) {
+                imagePreviewUrls.set(
+                  `${userMessage.id}:${index}`,
+                  imagePreviewSnapshot[imageIndex]
+                );
+                imageIndex += 1;
+              }
+            });
+          }
+
+          messages.push(userMessage);
+          syncMessagesCacheForCurrentChat();
+          renderMessages({ scrollBehavior: "bottom" });
+
+          if (exportType) {
+            await resolveAndTriggerExport(exportType, text);
+            return;
+          }
+
+          let apiContent;
+          try {
+            apiContent = files.length
+              ? await buildUserApiContent(text, files)
+              : text;
+          } catch (err) {
+            alert(err.message ?? "Could not process attached files.");
+            return;
+          }
+
+          const route =
+            activeModule.moduleType === "stocks"
+              ? await detectAgent(text, attachmentsMeta ?? [])
+              : null;
+
+          const routeResolved =
+            route ?? (await detectAgent(text, attachmentsMeta ?? []));
+
+          let liveMarketContext = null;
+
+          if (
+            activeModule.moduleType === "stocks" &&
+            (routeResolved === "sage" || routeResolved === "all")
+          ) {
+            try {
+              showToast("Fetching live market data…", 3000);
+              liveMarketContext = await buildLiveMarketContext();
+              console.log(
+                "LIVE MARKET CONTEXT RETURNED",
+                liveMarketContext
+              );
+              console.log(
+                "FORMATTED CONTEXT",
+                liveMarketContext?.formattedContext
+              );
+              console.log(
+                "SAGE CONTEXT",
+                JSON.stringify(
+                  {
+                    route: routeResolved,
+                    success: liveMarketContext?.success,
+                    macroCalendar: liveMarketContext?.macroCalendar ?? null,
+                    macroCalendarStatus:
+                      liveMarketContext?.macroCalendarStatus ?? {},
+                    calendarErrors: liveMarketContext?.calendarErrors ?? [],
+                    hasFormattedContext: Boolean(
+                      liveMarketContext?.formattedContext
+                    ),
+                  },
+                  null,
+                  2
+                )
+              );
+            } catch (err) {
+              console.warn(
+                "Market context fetch failed for Sage, continuing without it:",
+                err
+              );
+            }
+          } else if (
+            activeModule.moduleType === "stocks" &&
+            isMarketBriefRequest(text)
+          ) {
+            try {
+              showToast("Fetching live market data…", 3000);
+              const result = await buildLiveMarketContext();
+              if (result.success && typeof apiContent === "string") {
+                apiContent = `${result.formattedContext}\n\n---\n\nTaylor's request: ${apiContent}`;
+              }
+            } catch (err) {
+              console.warn(
+                "Market context fetch failed, continuing without it:",
+                err
+              );
+            }
+          }
+
+          isTypingVisible = true;
+          typingAgentKey = null;
+          renderMessages({ scrollBehavior: "none" });
+          const history = await getMessagesForContext(currentChat.id);
+          const historyBeforeLatest = history.slice(0, -1);
+
+          const primaryResponses = [];
+          const memoryInput = await getAgentMemory(
+            userId,
+            activeModule.moduleType === "business"
+              ? activeBusiness
+              : { id: activeModule.id }
+          );
+
+          if (routeResolved === "all") {
+            isTypingVisible = false;
+            renderMessages({ scrollBehavior: "none" });
+
+            await getAllAgentsResponse(
+              historyBeforeLatest,
+              apiContent,
+              memoryInput,
+              {
+                liveMarketContext,
+                onAgentStart: async (agent) => {
+                  showAgentTyping(agent);
+                },
+                onResponse: async ({ agent, content }) => {
+                  hideAgentTyping();
+                  primaryResponses.push({ agent, content });
+                  const saved = await saveAgentResponse(agent, content);
+                  if (saved) {
+                    primaryResponses[primaryResponses.length - 1] = {
+                      agent,
+                      content: saved.content,
+                    };
+                  }
+                  renderMessages({ scrollBehavior: "none" });
+                },
+              }
+            );
+          } else {
+            const agentKey = routeResolved.toLowerCase();
+            showAgentTyping(agentKey);
+            const content = await getAgentResponse(
+              agentKey,
+              historyBeforeLatest,
+              apiContent,
+              {
+                memoryFacts: memoryInput,
+                liveMarketContext:
+                  agentKey === "sage" ? liveMarketContext : null,
+              }
+            );
+            hideAgentTyping();
+            const saved = await saveAgentResponse(agentKey, content);
+            if (saved) {
+              primaryResponses.push({ agent: agentKey, content: saved.content });
+            }
+          }
+
+          isTypingVisible = false;
+          typingAgentKey = null;
+          renderMessages({ scrollBehavior: "none" });
+
+          const agentsRespondedThisTurn = new Set(
+            primaryResponses
+              .map((entry) => entry.agent?.toLowerCase())
+              .filter(Boolean)
+          );
+          await runFlagFollowUps(primaryResponses, agentsRespondedThisTurn);
+        } catch (err) {
+          console.error(err);
+          const errorBubble = document.createElement("div");
+          errorBubble.className = "system-msg";
+          errorBubble.textContent =
+            err.message ?? "Something went wrong. Please try again.";
+          messagesEl.appendChild(errorBubble);
+          scrollToBottom();
+        } finally {
+          isTypingVisible = false;
+          isWaiting = false;
+          setInputEnabled(true);
+          try {
+            if (currentChat) {
+              const stored = await getMessages(
+                currentChat.id,
+                activeModuleScopeId()
+              );
+              if (stored.length >= messages.length) {
+                messages = stored;
+                syncMessagesCacheForCurrentChat();
+              }
+            }
+          } catch (err) {
+            console.error("Failed to reload messages after send:", err);
+          }
+          await refreshChats();
+          syncMessagesCacheForCurrentChat();
+          renderMessages({ scrollBehavior: "none" });
+          messageInput.focus();
+        }
+      }
+
+      function saveCurrentChatId(chatId) {
+        if (chatId) {
+          sessionStorage.setItem(CURRENT_CHAT_KEY, chatId);
+        } else {
+          sessionStorage.removeItem(CURRENT_CHAT_KEY);
+        }
+      }
+
+      function sanitizeFilename(title) {
+        const base = (title || "chat")
+          .replace(/[^\w\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-")
+          .slice(0, 40);
+        return `${base || "chat"}.txt`;
+      }
+
+      function downloadText(filename, text) {
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function downloadJson(filename, data) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function getLatestFactDate(facts) {
+        if (!facts.length) return null;
+        return facts.reduce((latest, row) =>
+          new Date(row.created_at) > new Date(latest.created_at) ? row : latest
+        ).created_at;
+      }
+
+      async function addFact() {
+        const fact = window.prompt("Add a fact to the knowledge base:");
+        if (!fact?.trim()) return;
+
+        await addMemoryFact(userId, fact.trim(), null, activeModule.id);
+        scopeUi.memoryCache.delete(activeModuleScopeId());
+        await loadMemoryForScope();
+      }
+
+      function renderMemoryPanelContent(facts) {
+        const factCards = facts
+          .map(
+            (row) => `
+              <div class="mem-fact-card" data-fact-id="${row.id}">
+                <div class="mem-fact-text">${escapeHtml(row.fact)}</div>
+                <button type="button" class="mem-fact-del" aria-label="Delete fact" data-fact-id="${row.id}">
+                  <i class="ti ti-x" aria-hidden="true"></i>
+                </button>
+              </div>
+            `
+          )
+          .join("");
+
+        const lastUpdated = getLatestFactDate(facts);
+        const lastUpdatedHtml = lastUpdated
+          ? `<div class="mem-last-updated">Last updated · ${formatFullDate(lastUpdated)}</div>`
+          : "";
+
+        memoryBodyEl.innerHTML = `
+          <div class="mem-kb-block">
+            <div class="mem-kb-meta">
+              <div class="mem-count">${facts.length} fact${facts.length === 1 ? "" : "s"}</div>
+            </div>
+            <div class="mem-grid">
+              ${factCards}
+              <button type="button" class="add-fact-card" id="add-fact-btn">
+                <i class="ti ti-plus" aria-hidden="true"></i>
+                Add fact
+              </button>
+            </div>
+            ${lastUpdatedHtml}
+          </div>
+        `;
+
+        memoryBodyEl.querySelectorAll(".mem-fact-del").forEach((btn) => {
+          btn.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            await deleteMemoryFact(btn.dataset.factId, activeModule.id);
+            scopeUi.memoryCache.delete(activeModuleScopeId());
+            await loadMemoryForScope();
+          });
+        });
+
+        const addBtn = memoryBodyEl.querySelector("#add-fact-btn");
+        if (addBtn) {
+          addBtn.addEventListener("click", addFact);
+        }
+      }
+
+      async function loadMemoryForScope(moduleRequestId = scopeUi.moduleLoadId) {
+        const scopeId = activeModuleScopeId();
+        const loadId = scopeUi.bumpMemoryLoad();
+        scopeUi.loading.memory = true;
+
+        const cached = scopeUi.memoryCache.get(scopeId);
+        if (cached) {
+          renderMemoryPanelContent(cached);
+        } else {
+          renderPanelLoading(memoryBodyEl, "Loading knowledge base…");
+        }
+
+        try {
+          const facts = await getMemory(userId, scopeId);
+          if (
+            !scopeUi.isMemoryLoadCurrent(loadId) ||
+            scopeId !== activeModuleScopeId() ||
+            !scopeUi.isModuleLoadCurrent(moduleRequestId)
+          ) {
+            return;
+          }
+
+          scopeUi.memoryCache.set(scopeId, facts);
+          renderMemoryPanelContent(facts);
+        } catch (err) {
+          if (!scopeUi.isMemoryLoadCurrent(loadId)) return;
+          throw err;
+        } finally {
+          if (scopeUi.isMemoryLoadCurrent(loadId)) {
+            scopeUi.loading.memory = false;
+          }
+        }
+      }
+
+      async function renderMemoryPanel() {
+        await loadMemoryForScope();
+      }
+
+      async function extractMemoryFromCurrentChat() {
+        if (!currentChat) {
+          alert("Open a chat with messages before extracting memory.");
+          return;
+        }
+
+        if (!messages.length) {
+          alert("This chat has no messages to extract from.");
+          return;
+        }
+
+        const extractBtn = document.getElementById("mem-extract-btn");
+        extractBtn.disabled = true;
+        extractBtn.textContent = "Extracting…";
+
+        try {
+          const history = await getMessagesForContext(currentChat.id);
+          const extracted = await extractSharedMemoryFromChat(history);
+
+          for (const fact of extracted) {
+            await addMemoryFact(userId, fact, null, activeModule.id);
+          }
+
+          scopeUi.memoryCache.delete(activeModuleScopeId());
+          await loadMemoryForScope();
+          await refreshAgentPrompts();
+        } catch (err) {
+          console.error(err);
+          alert(err.message ?? "Failed to extract memory.");
+        } finally {
+          extractBtn.disabled = false;
+          extractBtn.innerHTML =
+            '<i class="ti ti-sparkles" aria-hidden="true"></i> Extract from current chat';
+        }
+      }
+
+      async function exportMemoryPanel() {
+        const memory = await getMemory(userId, activeModule.id);
+        downloadJson(
+          `${activeModule.id}-memory-${new Date().toISOString().slice(0, 10)}.json`,
+          memory
+        );
+      }
+
+      const memImportFileEl = document.getElementById("mem-import-file");
+      const memImportErrorEl = document.getElementById("mem-import-error");
+
+      function clearMemImportError() {
+        if (!memImportErrorEl) return;
+        memImportErrorEl.textContent = "";
+        memImportErrorEl.classList.add("hidden");
+      }
+
+      function showMemImportError(message) {
+        if (!memImportErrorEl) return;
+        memImportErrorEl.textContent = message;
+        memImportErrorEl.classList.remove("hidden");
+      }
+
+      function parseImportedMemoryFacts(parsed) {
+        if (!Array.isArray(parsed)) return null;
+
+        const facts = [];
+        for (const item of parsed) {
+          if (typeof item === "string") {
+            const trimmed = item.trim();
+            if (trimmed) facts.push(trimmed);
+          } else if (
+            item &&
+            typeof item === "object" &&
+            typeof item.fact === "string"
+          ) {
+            const trimmed = item.fact.trim();
+            if (trimmed) facts.push(trimmed);
+          }
+        }
+        return facts;
+      }
+
+      async function importMemoryFromFile(file) {
+        clearMemImportError();
+
+        let text;
+        try {
+          text = await file.text();
+        } catch {
+          showMemImportError("Could not read the file.");
+          return;
+        }
+
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          showMemImportError("Invalid JSON file.");
+          return;
+        }
+
+        const facts = parseImportedMemoryFacts(parsed);
+        if (facts === null) {
+          showMemImportError(
+            "Invalid format. Expected a JSON array of facts."
+          );
+          return;
+        }
+
+        if (facts.length === 0) {
+          showMemImportError("No facts found in file.");
+          return;
+        }
+
+        const moduleName = activeModule.displayName;
+        const confirmed = window.confirm(
+          `Import ${facts.length} fact${facts.length === 1 ? "" : "s"} into ${moduleName} memory? This will add to existing facts, not replace them.`
+        );
+        if (!confirmed) return;
+
+        for (const fact of facts) {
+          await addMemoryFact(userId, fact, null, activeModule.id);
+        }
+
+        scopeUi.memoryCache.delete(activeModuleScopeId());
+        await loadMemoryForScope();
+        await refreshAgentPrompts();
+        showToast(`${facts.length} facts imported successfully`);
+      }
+
+      function triggerImportMemory() {
+        clearMemImportError();
+        memImportFileEl.value = "";
+        memImportFileEl.click();
+      }
+
+      async function exportAllChats() {
+        if (!chats.length) {
+          alert("No chats to export.");
+          return;
+        }
+
+        const sections = [];
+
+        for (const chat of chats) {
+          sections.push(await exportChat(chat.id, activeModuleScopeId()));
+        }
+
+        downloadText(
+          `${activeModuleScopeId()}-all-chats-${new Date().toISOString().slice(0, 10)}.txt`,
+          sections.join("\n\n" + "=".repeat(60) + "\n\n")
+        );
+      }
+
+      async function exportCurrentChat() {
+        if (!currentChat) {
+          alert("Select or start a chat to export.");
+          return;
+        }
+
+        const text = await exportChat(
+          currentChat.id,
+          activeModuleScopeId()
+        );
+        downloadText(
+          sanitizeFilename(currentChat.title || "chat"),
+          text
+        );
+      }
+
+      async function renameCurrentChat() {
+        if (!currentChat) return;
+
+        const nextTitle = window.prompt(
+          "Rename chat",
+          currentChat.title || "Untitled chat"
+        );
+        if (!nextTitle?.trim()) return;
+
+        currentChat = await updateChatTitle(
+          currentChat.id,
+          nextTitle.trim(),
+          activeModuleScopeId()
+        );
+        await refreshChats();
+      }
+
+      function toggleSettingsDropdown(anchorEl = null) {
+        const willOpen = settingsDropdown.classList.contains("hidden");
+        if (!willOpen) {
+          closeSettingsDropdown();
+          return;
+        }
+
+        const anchor = anchorEl || document.getElementById("settings-btn");
+        settingsDropdown.classList.remove("hidden");
+        settingsDropdown.style.position = "fixed";
+        settingsDropdown.classList.add("settings-dropdown-floating");
+
+        const rect = anchor.getBoundingClientRect();
+        const dropdownHeight = settingsDropdown.offsetHeight;
+
+        if (document.body.classList.contains("sidebar-collapsed")) {
+          settingsDropdown.style.left = `${rect.right + 6}px`;
+          settingsDropdown.style.top = `${rect.top}px`;
+        } else {
+          settingsDropdown.style.left = `${rect.left}px`;
+          settingsDropdown.style.top = `${Math.max(8, rect.top - dropdownHeight - 6)}px`;
+        }
+      }
+
+      function closeSettingsDropdown() {
+        settingsDropdown.classList.add("hidden");
+        settingsDropdown.style.position = "";
+        settingsDropdown.style.left = "";
+        settingsDropdown.style.top = "";
+        settingsDropdown.style.bottom = "";
+        settingsDropdown.style.right = "";
+        settingsDropdown.classList.remove("settings-dropdown-floating");
+      }
+
+      const sidebarToggleBtn = document.getElementById("sidebar-toggle-btn");
+      const sidebarRail = document.getElementById("sidebar-rail");
+
+      function isDesktopSidebar() {
+        return window.matchMedia("(min-width: 561px)").matches;
+      }
+
+      function setSidebarCollapsed(collapsed, persist = true) {
+        if (!isDesktopSidebar()) {
+          document.body.classList.remove("sidebar-collapsed");
+          sidebarRail.setAttribute("aria-hidden", "true");
+          return;
+        }
+
+        document.body.classList.toggle("sidebar-collapsed", collapsed);
+        sidebarRail.setAttribute("aria-hidden", collapsed ? "false" : "true");
+
+        sidebarToggleBtn.setAttribute(
+          "aria-label",
+          collapsed ? "Expand sidebar" : "Collapse sidebar"
+        );
+        sidebarToggleBtn.title = collapsed
+          ? "Expand sidebar"
+          : "Collapse sidebar";
+        sidebarToggleBtn.querySelector("i").className = collapsed
+          ? "ti ti-chevrons-right"
+          : "ti ti-chevrons-left";
+
+        if (persist) {
+          localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+        }
+        window.__repositionAgentTooltips?.();
+      }
+
+      function initSidebarCollapse() {
+        const collapsed =
+          localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+        setSidebarCollapsed(collapsed, false);
+      }
+
+      async function handleSignOut() {
+        closeSettingsDropdown();
+        setCloudStorageUser(null);
+        await signOut();
+        sessionStorage.removeItem(currentChatStorageKey());
+        window.location.href = "/index.html";
+      }
+
+      newChatBtn.addEventListener("click", startNewChat);
+      navMemoryBtn.addEventListener("click", () => showPage("memory"));
+      navDocumentsBtn.addEventListener("click", () => showPage("documents"));
+      document.getElementById("doc-preview-close").addEventListener("click", closeDocPreview);
+      document.getElementById("doc-preview-backdrop").addEventListener("click", closeDocPreview);
+
+      messageInput.addEventListener("input", () => {
+        autoResize(messageInput);
+        updateSendButtonState();
+      });
+
+      attachBtn.addEventListener("click", () => fileInput.click());
+
+      fileInput.addEventListener("change", () => {
+        addAttachmentFiles(fileInput.files);
+        fileInput.value = "";
+      });
+
+      chatPageBody.addEventListener("dragenter", (event) => {
+        if (activePage !== "chat" || !event.dataTransfer?.types.includes("Files")) {
+          return;
+        }
+        event.preventDefault();
+        dragDepth += 1;
+        showDropZone(true);
+      });
+
+      chatPageBody.addEventListener("dragover", (event) => {
+        if (activePage !== "chat" || !event.dataTransfer?.types.includes("Files")) {
+          return;
+        }
+        event.preventDefault();
+      });
+
+      chatPageBody.addEventListener("dragleave", (event) => {
+        if (activePage !== "chat") return;
+        event.preventDefault();
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (dragDepth === 0) showDropZone(false);
+      });
+
+      chatPageBody.addEventListener("drop", (event) => {
+        if (activePage !== "chat") return;
+        event.preventDefault();
+        dragDepth = 0;
+        showDropZone(false);
+        addAttachmentFiles(event.dataTransfer?.files);
+      });
+
+      messageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+
+      sendBtn.addEventListener("click", sendMessage);
+
+      micBtn.addEventListener("click", () => {
+        alert("Voice input is coming soon.");
+      });
+
+      document.getElementById("settings-btn").addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleSettingsDropdown(event.currentTarget);
+      });
+      function initLegacyMigrationControls() {
+        const section = document.getElementById("legacy-migration-section");
+        if (!section || !isLegacyMigrationAllowed()) return;
+
+        section.hidden = false;
+        section.classList.remove("hidden");
+
+        const docsBtn = document.getElementById("migrate-legacy-docs-btn");
+        const memoryBtn = document.getElementById("migrate-legacy-memory-btn");
+
+        docsBtn?.addEventListener("click", async () => {
+          if (
+            !confirm(
+              "Upload all local documents (docs_meta_* + IndexedDB) to Supabase? Local data is kept. Safe to re-run — duplicates are skipped."
+            )
+          ) {
+            return;
+          }
+          docsBtn.disabled = true;
+          try {
+            const report = await migrateLegacyDocumentsToSupabase(userId);
+            alert(
+              `Document migration complete.\n\n` +
+                `docs_meta keys: ${report.docsMetaKeys.length}\n` +
+                `attempted: ${report.attempted}\n` +
+                `migrated: ${report.migrated}\n` +
+                `skipped (duplicate): ${report.skippedDuplicate}\n` +
+                `failed: ${report.failed.length}\n\n` +
+                `See console for details.`
+            );
+          } catch (err) {
+            console.error("[migration:documents]", err);
+            alert(`Document migration failed: ${err.message ?? err}`);
+          } finally {
+            docsBtn.disabled = false;
+          }
+        });
+
+        memoryBtn?.addEventListener("click", async () => {
+          if (
+            !confirm(
+              "Upload all local memory facts (memoryFacts_*) to Supabase? Local data is kept. Safe to re-run — duplicates are skipped."
+            )
+          ) {
+            return;
+          }
+          memoryBtn.disabled = true;
+          try {
+            const report = await migrateLegacyMemoryToSupabase(userId);
+            alert(
+              `Memory migration complete.\n\n` +
+                `memoryFacts keys: ${report.memoryFactsKeys.length}\n` +
+                `attempted: ${report.attempted}\n` +
+                `migrated: ${report.migrated}\n` +
+                `skipped (duplicate): ${report.skippedDuplicate}\n` +
+                `failed: ${report.failed.length}\n\n` +
+                `See console for details.`
+            );
+          } catch (err) {
+            console.error("[migration:memory]", err);
+            alert(`Memory migration failed: ${err.message ?? err}`);
+          } finally {
+            memoryBtn.disabled = false;
+          }
+        });
+      }
+
+      document.getElementById("sign-out-btn").addEventListener("click", handleSignOut);
+      document.getElementById("export-btn").addEventListener("click", exportAllChats);
+      document.getElementById("export-chat-btn").addEventListener("click", exportCurrentChat);
+      document.getElementById("rename-btn").addEventListener("click", renameCurrentChat);
+      document.getElementById("mem-extract-btn").addEventListener("click", extractMemoryFromCurrentChat);
+      document.getElementById("mem-export-btn").addEventListener("click", exportMemoryPanel);
+      document.getElementById("mem-import-btn").addEventListener("click", triggerImportMemory);
+      memImportFileEl.addEventListener("change", async () => {
+        const file = memImportFileEl.files?.[0];
+        if (!file) return;
+        await importMemoryFromFile(file);
+        memImportFileEl.value = "";
+      });
+
+      document.getElementById("rail-new-chat").addEventListener("click", startNewChat);
+      document.getElementById("rail-memory").addEventListener("click", () => showPage("memory"));
+      document.getElementById("rail-documents").addEventListener("click", () => showPage("documents"));
+      document.getElementById("rail-export").addEventListener("click", exportAllChats);
+      document.getElementById("rail-settings").addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleSettingsDropdown(event.currentTarget);
+      });
+
+      sidebarToggleBtn.addEventListener("click", () => {
+        const collapsed = !document.body.classList.contains("sidebar-collapsed");
+        setSidebarCollapsed(collapsed);
+        closeSettingsDropdown();
+      });
+
+      window.addEventListener("resize", () => {
+        if (!isDesktopSidebar()) {
+          setSidebarCollapsed(false, false);
+        } else {
+          const collapsed =
+            localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+          setSidebarCollapsed(collapsed, false);
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        if (
+          !event.target.closest(".settings-wrap") &&
+          !event.target.closest("#settings-dropdown") &&
+          !event.target.closest("#rail-settings")
+        ) {
+          closeSettingsDropdown();
+        }
+      });
+
+      const hamburgerBtn = document.getElementById("hamburger-btn");
+      const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+
+      function openSidebar() {
+        document.body.classList.add("sidebar-open");
+        window.__repositionAgentTooltips?.();
+      }
+
+      function closeSidebar() {
+        document.body.classList.remove("sidebar-open");
+        window.__repositionAgentTooltips?.();
+      }
+
+      hamburgerBtn.addEventListener("click", openSidebar);
+      sidebarBackdrop.addEventListener("click", closeSidebar);
+
+      document.querySelectorAll(".agent-desc-role").forEach((btn) => {
+        btn.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const wasOpen = btn.classList.contains("is-open");
+          document.querySelectorAll(".agent-desc-role.is-open").forEach((el) => {
+            el.classList.remove("is-open");
+            el.setAttribute("aria-expanded", "false");
+          });
+          if (!wasOpen) {
+            btn.classList.add("is-open");
+            btn.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
+
+      document.addEventListener("click", (event) => {
+        if (event.target.closest(".agent-desc-role")) return;
+        document.querySelectorAll(".agent-desc-role.is-open").forEach((el) => {
+          el.classList.remove("is-open");
+          el.setAttribute("aria-expanded", "false");
+        });
+      });
+
+      function renderAgentDescBar() {
+        const bar = document.querySelector(".agent-desc-bar");
+        if (!bar) return;
+
+        const entries = Object.entries(AGENT_META);
+        bar.innerHTML = entries
+          .map(([key, meta], index) => {
+            const divider =
+              index < entries.length - 1
+                ? `<div class="agent-desc-divider" aria-hidden="true"></div>`
+                : "";
+            const tooltipLabel = buildAgentTooltipLabel(meta);
+            return `
+        <div class="agent-desc-item" data-agent-theme="${meta.theme}">
+          ${renderAgentAvatar(meta, AVATAR_ICON_SIZES.bar)}
+          <div class="agent-desc-content">
+            <button type="button" class="agent-desc-name-btn" data-agent="${key}" data-agent-theme="${meta.theme}" aria-label="${escapeHtml(tooltipLabel)}">
+              <span class="agent-desc-name ${meta.senderClass}">${escapeHtml(meta.name)}</span>
+              <span class="agent-desc-tooltip" role="tooltip">${buildAgentTooltipHtml(meta)}</span>
+            </button>
+          </div>
+        </div>
+        ${divider}
+      `;
+          })
+          .join("");
+
+        bindAgentBarTooltips();
+      }
+
+      function renderTagHints() {
+        const tagHintsEl = document.querySelector(".tag-hints");
+        if (!tagHintsEl) return;
+
+        const entries = Object.entries(AGENT_META);
+        const chips = entries
+          .map(
+            ([key, meta]) => `
+      <button type="button" class="tag-hint ${meta.thClass}" data-tag="@${meta.name} " data-agent-theme="${meta.theme}">@${escapeHtml(meta.name)}</button>
+    `
+          )
+          .join("");
+
+        const allChip = `<button type="button" class="tag-hint th-all" data-tag="@all ">@all</button>`;
+        tagHintsEl.innerHTML = chips + allChip;
+
+        tagHintsEl.querySelectorAll(".tag-hint").forEach((btn) => {
+          btn.addEventListener("click", () => insertTag(btn.dataset.tag));
+        });
+
+        const names = entries.map(([, m]) => m.name).join(", ");
+        messageInput.placeholder = `Message ${names}… or tag with ${entries.map(([, m]) => `@${m.name}`).join(" ")} @all`;
+      }
+
+      function renderInputHint() {
+        const hint = document.querySelector(".input-hint");
+        if (!hint) return;
+        hint.textContent =
+          "Tag an agent to direct your message · @all broadcasts to all · No tag = auto-routed · Shift+Enter for new line";
+      }
+
+      async function init() {
+        migrateOldData();
+
+        try {
+          await initDocumentDB();
+          await migrateDocumentMetadataV2();
+        } catch (err) {
+          console.error("Document database init failed:", err);
+        }
+
+        try {
+          session = await getSession();
+        } catch (err) {
+          console.error("Session check failed:", err);
+          window.location.href = "/index.html";
+          return;
+        }
+
+        if (!session) {
+          window.location.href = "/index.html";
+          return;
+        }
+
+        try {
+          userId = session.user.id;
+          setCloudStorageUser(userId);
+          initLegacyMigrationControls();
+          try {
+            await syncLocalDocumentsToCloud();
+            await syncLocalMemoryToCloud();
+            await syncLocalChatsToCloud();
+          } catch (syncErr) {
+            console.warn("[cloud] Local → cloud sync skipped:", syncErr);
+          }
+          userDisplayName =
+            session.user.user_metadata?.full_name?.trim() ||
+            session.user.email?.split("@")[0] ||
+            "You";
+          userInitials = getInitials(userDisplayName);
+
+          initSidebarCollapse();
+          activeModule = getActiveModule();
+          updateStorageKeys(activeModule.id);
+          renderBusinessSelect();
+          initBusinessDropdown();
+          await refreshAgentPrompts();
+          updateBusinessChrome();
+          updateDocumentTitle();
+          updateMemoryPageHeader();
+          renderAgentDescBar();
+          renderTagHints();
+          renderInputHint();
+
+          try {
+            await loadBusinessChats();
+          } catch (err) {
+            console.error("Failed to load chats:", err);
+            chats = [];
+            messagesEl.innerHTML = renderLoadError("Could not load chats", err);
+          }
+
+          // Start polling for cron-generated market briefs
+          startBriefPoller(async (brief) => {
+            if (activeModule.id === "stocks") {
+              chats = await getChats(userId, "stocks");
+              renderSidebar();
+              showToast("New Sage market brief available", 4000);
+            }
+          });
+
+          updateSendButtonState();
+        } catch (err) {
+          console.error("Chat init failed:", err);
+          messagesEl.innerHTML = `
+            <div class="empty-state">
+              <h2>Something went wrong</h2>
+              <p>${escapeHtml(err.message ?? "Please refresh and try again.")}</p>
+            </div>
+          `;
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
